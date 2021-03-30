@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-public class ParticleContral : MonoBehaviour {
+public class ConnectParticleContral : MonoBehaviour {
     public Color BaseColor;
     public Color LinearColor;
     public Color FinalColor;
@@ -22,7 +22,6 @@ public class ParticleContral : MonoBehaviour {
         height = Camera.main.pixelHeight*0.0159f;
         m_Transform = gameObject.GetComponent<Transform>();
         m_ParticleSystem = gameObject.GetComponent<ParticleSystem>();
-        
         var main = m_ParticleSystem.main;
         main.maxParticles = ParticleCnt;
         main.startLifetime = 99999f;
@@ -48,7 +47,7 @@ public class ParticleContral : MonoBehaviour {
         var strails = sps.trails;
         strails.enabled = false;
         strails.mode = ParticleSystemTrailMode.Ribbon;
-        strails.widthOverTrail = 0.1f;
+        strails.widthOverTrail = 0.01f;
 
         var spsr = sps.GetComponent<ParticleSystemRenderer>();
         spsr.renderMode = ParticleSystemRenderMode.None;
@@ -81,24 +80,24 @@ public class ParticleContral : MonoBehaviour {
                 // m_particles[i].velocity = new Vector3(0, 1, 0);
 
                 //left
-                if(i < edge)
-                    m_particles[i].position = new Vector3(-width/2,   (height/edge)*(float)(i-edge/2), 20f);
-                //top
-                else if(i < 2*edge)
-                    m_particles[i].position = new Vector3((width/edge)*((float)i-edge-edge/2),   height/2, 20f);
-                //right
-                else if(i < 3*edge)
-                    m_particles[i].position = new Vector3(width/2,   (height/edge)*((float)i-2*edge-edge/2), 20f);
-                //bottom
-                else if(i < 4*edge)
-                    m_particles[i].position = new Vector3((width/edge)*((float)i-3*edge-edge/2),   -height/2, 20f);
-                // m_particles[i].position = new Vector3(0.3f*width*(Random.value-0.5f), 0.3f*height*(Random.value-0.5f), 20f);
+                // if(i < edge)
+                //     m_particles[i].position = new Vector3(-width/2,   (height/edge)*(float)(i-edge/2), 20f);
+                // //top
+                // else if(i < 2*edge)
+                //     m_particles[i].position = new Vector3((width/edge)*((float)i-edge-edge/2),   height/2, 20f);
+                // //right
+                // else if(i < 3*edge)
+                //     m_particles[i].position = new Vector3(width/2,   (height/edge)*((float)i-2*edge-edge/2), 20f);
+                // //bottom
+                // else if(i < 4*edge)
+                //     m_particles[i].position = new Vector3((width/edge)*((float)i-3*edge-edge/2),   -height/2, 20f);
+                m_particles[i].position = new Vector3(0.3f*width*(Random.value-0.5f), 0.3f*height*(Random.value-0.5f), 20f);
             }
         }
         else
         {
-            // var strails = sps.trails;
-            // strails.enabled = true;
+            var strails = sps.trails;
+            strails.enabled = true;
             // strails.splitSubEmitterRibbons = true;
         }
         for (int i = 0; i < num; i++) 
@@ -106,10 +105,7 @@ public class ParticleContral : MonoBehaviour {
 
             m_particles[i].startColor = Color.Lerp(BaseColor, LinearColor, (m_particles[i].position.x+width/2)/width);
             m_particles[i].startColor = Color.Lerp(FinalColor, m_particles[i].startColor, (m_particles[i].position.y+height/2)/height);
-            //粗纹理
-            //float noise = Perlin.Fbm(new Vector2(m_particles[i].position.x, m_particles[i].position.y), 2);
-            //线条纹理
-            float noise = Perlin.Fbm(new Vector2(m_particles[i].position.x*0.2f, m_particles[i].position.y*0.2f), 2);
+            float noise = Perlin.Fbm(new Vector2(m_particles[i].position.x, m_particles[i].position.y), 2);
             
             Vector3 Dir = NoiseToDir(noise).normalized;
             if(i < edge)
