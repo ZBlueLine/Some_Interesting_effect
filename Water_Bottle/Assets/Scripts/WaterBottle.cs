@@ -5,10 +5,14 @@ using UnityEngine;
 public class WaterBottle : MonoBehaviour
 {
     public float SinSpeed;
+    public float FadeSpeed;
     Material Bottle;
     Vector3 LastPos;
+    Vector3 LastAngle;
     Vector3 forceDir;
+    Vector3 AngleDir;
     Vector3 LastFDir;
+    Vector3 LastFAngleDir;
     
     float damping;
     int cnt;
@@ -21,7 +25,10 @@ public class WaterBottle : MonoBehaviour
     {
         forceDir = new Vector3(0, 0, 0);
         LastFDir = new Vector3(0, 0, 0);
+        LastFAngleDir = new Vector3(0, 0, 0);
+
         LastPos = transform.position;
+        LastAngle = transform.rotation.eulerAngles;
         Bottle = gameObject.GetComponent<Renderer>().material;
     }
 
@@ -30,20 +37,26 @@ public class WaterBottle : MonoBehaviour
     {
         
         forceDir = transform.position - LastPos;
-        forceDir*=3;
-        if(forceDir.magnitude > LastFDir.magnitude * damping)
-        {
-            LastFDir = forceDir;
-            damping = 1;
-        }
-        damping *= 0.99f;
+        AngleDir = transform.rotation.eulerAngles - LastAngle;
+        AngleDir *= 0.05f;
 
-        LastPos = transform.position;
+        LastFDir = Vector3.Lerp(LastFDir, new Vector3(0, 0, 0), Time.deltaTime * FadeSpeed);
+        LastFAngleDir = Vector3.Lerp(LastFAngleDir, new Vector3(0, 0, 0), Time.deltaTime * FadeSpeed);
+        LastFAngleDir.y = 0;
 
-        Vector3 SinForceDir = damping * LastFDir * Mathf.Sin(SinSpeed*Time.time);
+        Vector3 SinForceDir = LastFDir * Mathf.Cos(SinSpeed*Time.time) + LastFAngleDir * Mathf.Cos(SinSpeed*Time.time);
 
         Bottle.SetVector("_ForceDir", SinForceDir);
         Bottle.SetVector("_WorldZeroPos", transform.position);
-        Debug.Log(transform.position);
+        
+        Debug.Log(forceDir);
+        // if(forceDir.magnitude >= 1)
+            LastFDir += Vector3.ClampMagnitude(forceDir, forceDir.magnitude*0.15f);
+        // else
+        //     LastFDir += Vector3.ClampMagnitude(forceDir, 0.008f);
+        LastFAngleDir += Vector3.ClampMagnitude(AngleDir, 0.006f);
+
+        LastPos = transform.position;
+        LastAngle = transform.rotation.eulerAngles;
     }
 }
