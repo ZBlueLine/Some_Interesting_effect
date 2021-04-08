@@ -61,14 +61,20 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlphaRange: 0.52
+    - _BackLightP: 19
+    - _BackLightScale: 15.82
     - _BumpScale: 1
     - _Cutoff: 0.5
+    - _Delta: 0.45
     - _DetailNormalMapScale: 1
     - _Dis: 0.05
     - _DstBlend: 0
     - _EdgeWidth: 0.08
-    - _FillAmount: -0.24
+    - _FillAmount: -0.16
     - _FoamWidth: 0.1
+    - _FresnelGlass0: 0.01
+    - _FresnelWater0: 0.5
+    - _FresnelWaterP: 2.9
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -96,19 +102,21 @@ Material:
     - _WaveHeight: 1
     - _ZWrite: 1
     m_Colors:
+    - _BackColor: {r: 0.8265168, g: 1, b: 0.8254717, a: 1}
     - _BottleColor: {r: 0.8726415, g: 1, b: 0.9310362, a: 1}
     - _CameraOffset: {r: 0.2, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorBack: {r: 0.7169812, g: 0.064257726, b: 0.064257726, a: 1}
     - _ColorFront: {r: 1, g: 0.02352941, b: 0.08105971, a: 1}
-    - _ColorWater: {r: 0.28773582, g: 0.7801223, b: 1, a: 1}
+    - _ColorWater: {r: 0, g: 0.41509432, b: 0.13091436, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoamColor: {r: 0.49519405, g: 0.7870606, b: 0.9811321, a: 0}
+    - _FoamColor: {r: 0.9953755, g: 1, b: 0.995283, a: 0}
     - _ForceDir: {r: 0, g: 0, b: 0, a: 0}
+    - _FresnelColor: {r: 0.3254717, g: 1, b: 0.35977656, a: 1}
     - _LiquidCameraOffset: {r: 0.2, g: 0, b: 0, a: 0}
     - _LiquidRimColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 0.7169812, g: 0.2636043, b: 0.15895337, a: 1}
     - _SectionColor: {r: 0.80833924, g: 0.9523276, b: 0.990566, a: 1}
-    - _SurfaceColor: {r: 0.5019608, g: 0.7607843, b: 0.93333334, a: 1}
+    - _SurfaceColor: {r: 0.6745283, g: 1, b: 0.7204098, a: 1}
     - _TopColor: {r: 0.92982376, g: 0.96736103, b: 0.990566, a: 1}
     - _WaterColor: {r: 0, g: 0.7038722, b: 1, a: 0}

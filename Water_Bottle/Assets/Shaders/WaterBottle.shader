@@ -14,6 +14,17 @@
         _NoiseScale("Noise Scale", Range(0, 6)) = 1
         _NoiseFrequence("Noise Frequence", Range(0, 1)) = 0.1
         _NoiseSpeed("Noise Speed", Range(0, 5)) = 1
+        _FresnelWater0("Water Fresnel Value", float) = 0.02
+        _FresnelWaterP("Fresnel Water Power", range(0, 6)) = 2
+
+        _FresnelGlass0("Glass Fresnel Value", float) = 0.028
+
+        [Space(10)] 
+        _Delta("BackLight Distortion", Range(0, 2)) = 1
+        _BackLightScale("Back Light Scale", float) = 1
+        _BackLightP("Back Light P", float) = 10
+        _FresnelColor("Fresnel Color", Color) = (0, 0, 0, 1)
+
 
         [Space(20)]
         _BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
@@ -33,9 +44,15 @@
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
+			#include "UnityCG.cginc"
+			#include "Lighting.cginc"
+			#include "AutoLight.cginc"
+			#include "EsShaders_Inputs.cginc"
+			#include "EsShaders_BRDF.cginc"
+            
+            #include "EsShaders_FowardLighting.cginc"
 
-            struct appdata
+            struct a2v
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -46,7 +63,7 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-                float WaterEdge : TEXCOORD1;
+                float WaterEdgeY : TEXCOORD1;
                 float3 worldnormal : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
             };
@@ -65,30 +82,50 @@
             fixed4 _ColorWater;
             fixed4 _SectionColor;
             float _SectionFactor;
+
+            float _FresnelWater0;
+            float _FresnelGlass0;
+
+            float _FresnelWaterP;
             
             fixed4 _SurfaceColor;
             float3 _WorldZeroPos;
 
             float3 _ForceDir;
 
+            //-------------SubSurface------------------
+            float _Delta;
+            float _BackLightScale;
+            float _BackLightP;
+            fixed4 _FresnelColor;
+
+
             float GetWaterHeight(float3 worldPos, float height, float newHeight)
             {
                 float3 DisVector = float3(worldPos.x, height, worldPos.z) - float3(_WorldZeroPos.x, height, _WorldZeroPos.z);
                 // float forceValue = length(_ForceDir);
                 // _ForceDir = float3(4, 0, 0);
+                _ForceDir.xz += _ForceDir.y;
                 float d = dot(DisVector, _ForceDir);
-                return height + d * newHeight;
+                // d += saturate(_ForceDir.y);
+                return height + d * newHeight;// + _ForceDir.y*newHeight;
+            }
+
+            float GetFresnel(float3 V, float3 H)
+            {
+                // return _FresnelWater0 + (1 - _FresnelWater0)*pow(2, -5.55473*dot(V, H)-6.98316*dot(V, H));
+                return _FresnelWater0 + (1 - _FresnelWater0)*pow(1-dot(V, H), _FresnelWaterP);
             }
 
 
-            v2f vert (appdata v)
+            v2f vert (a2v v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _NoiseTex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
-                o.WaterEdge = o.worldPos.y - _WorldZeroPos.y - _FillAmount;
+                o.WaterEdgeY = o.worldPos.y - _WorldZeroPos.y - _FillAmount;
                 o.worldnormal = UnityObjectToWorldNormal(v.normal);
 
                 return o;
@@ -99,24 +136,24 @@
                 float3 worldNormal = normalize(i.worldnormal);
                 float3 LightDir = normalize(_WorldSpaceLightPos0.xyz);
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
-
-                // float waterHeight = cos(i.worldPos.x*UNITY_PI +_Time.y);
+                float3 halfDir = normalize(viewDir + LightDir);
 
                 float waterHeight = _NoiseScale*(tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseFrequence + normalize(_ForceDir.xz)*_Time.z*_NoiseSpeed));
-                // float waterHeight = 2;
-                if(facing<0)
+                // return tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseFrequence + normalize(float2(1, 1))*_Time.z*_NoiseSpeed).r;
+
+                i.WaterEdgeY = GetWaterHeight(i.worldPos, i.WaterEdgeY, waterHeight*2);
+
+                if(0.5+_FoamWidth-i.WaterEdgeY < 0.1)
                 {
-                    // float3 dx = ddx(i.worldPos);
-                    // float3 dy = ddy(i.worldPos);
-                    // dx.y = ddx(waterHeight);
-                    // dy.y = ddy(waterHeight);
-                    // worldNormal = normalize(cross(dx, dy));
-                    worldNormal = float3(0, 1, 0);
+                    float3 horizonViewDir = viewDir;
+                    horizonViewDir.y = 0;
+                    i.WaterEdgeY = lerp(i.WaterEdgeY, i.WaterEdgeY + 0.07, pow((cos(dot(horizonViewDir, worldNormal))-0.5)*2, 5));
                 }
-                // return waterHeight;
-                i.WaterEdge = GetWaterHeight(i.worldPos, i.WaterEdge, waterHeight*2);
-                float edgeVal = step(i.WaterEdge, 0.5+_FoamWidth) - step(i.WaterEdge, 0.5);
-                float finalVal = (step(i.WaterEdge, 0.5));
+                if(facing<0)
+                    worldNormal = float3(0, 1, 0);
+
+                float edgeVal = step(i.WaterEdgeY, 0.5+_FoamWidth) - step(i.WaterEdgeY, 0.5);
+                float finalVal = (step(i.WaterEdgeY, 0.5));
 
                 fixed4 edgeCol = edgeVal * _FoamColor;
                 fixed4 col =  finalVal * _ColorWater;
@@ -128,12 +165,18 @@
                 fixed4 topColor = _SurfaceColor * (edgeVal + finalVal);
                 fixed4 color = facing > 0 ? col : topColor;
                 
-                fixed diffuse = 0.5*dot(worldNormal, LightDir) + 0.5;
-                color.rgb *= diffuse;
+                if(facing>0)
+                {
+                    //---------------------SubSurface--------------------
+                    float Fvalue = GetFresnel(viewDir, worldNormal - viewDir*_Delta);
+                    fixed LightBackValue = Fvalue;
+                    color.rgb = lerp(color.rgb, _FresnelColor.rgb, LightBackValue);
+                }
+                // float value = pow(1-dot(worldNormal, viewDir),_SectionFactor);
+                // value = smoothstep(0.1, 0.3, value);
 
-                float value = pow(1-dot(worldNormal, viewDir),_SectionFactor);
-                value = smoothstep(0.1, 0.3, value);
-                color = lerp(color, _SectionColor, value);
+                
+                // color = lerp(color, _SectionColor, Fvalue);
                 return color;
             }
             ENDCG
@@ -150,7 +193,7 @@
 
             #include "UnityCG.cginc"
 
-            struct appdata
+            struct a2v
             {
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
@@ -171,7 +214,7 @@
             float _Specular;
         
 
-            v2f vert (appdata v)
+            v2f vert (a2v v)
             {
                 v2f o;
                 v.vertex.xyz += v.normal * _Dis;
