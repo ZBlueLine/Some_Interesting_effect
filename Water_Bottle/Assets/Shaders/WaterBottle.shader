@@ -2,36 +2,42 @@
 {
     Properties
     {
-        _NoiseTex ("Noise Texture", 2D) = "white" {}
-        _FillAmount("Fill Amount", float) = 0
-
-        _ColorWater("Color Water", Color) = (0, 0, 0, 1)
-        _SurfaceColor("Surface Color", Color) = (0, 0, 0, 1)
-        _SectionColor("Section Color", Color) = (0, 0, 0, 1)
-        _SectionFactor("Section Factor", float) = 20
+        [Header(Water Properties)]
+        _FillAmount("Water Level", float) = 0
+        _WaterColor("Water Color", Color) = (0, 0, 0, 1)
+        _SurfaceColor("Water Surface Color", Color) = (0, 0, 0, 1)
         _FoamColor("Foam Color", Color) = (0, 0, 0, 1)
-        _FoamWidth("Foam Width", float) = 0.1
-        _NoiseScale("Noise Scale", Range(0, 6)) = 1
-        _NoiseFrequence("Noise Frequence", Range(0, 1)) = 0.1
-        _NoiseSpeed("Noise Speed", Range(0, 5)) = 1
-        _FresnelWater0("Water Fresnel Value", float) = 0.02
-        _FresnelWaterP("Fresnel Water Power", range(0, 6)) = 2
+        _FoamHeight("Foam Height", float) = 0.1
 
-        _FresnelGlass0("Glass Fresnel Value", float) = 0.028
+
+        [Space(10)]
+        [Header(Wave Controller)]
+        _NoiseTex ("Water Texture", 2D) = "white" {}
+        _NoiseScale("Water Wave Scale", Range(0, 6)) = 3.9
+        _NoiseDensity("Water Wave Density", Range(0, 1)) = 0.18
+        _NoiseSpeed("Wave Move Speed", Range(0, 5)) = 0.8
 
         [Space(10)] 
-        _Delta("BackLight Distortion", Range(0, 2)) = 1
-        _BackLightScale("Back Light Scale", float) = 1
-        _BackLightP("Back Light P", float) = 10
-        _FresnelColor("Fresnel Color", Color) = (0, 0, 0, 1)
+        [Header(Translucence Water Effect)]
+        _WaterThicknessValue("Water Thickness Value", Range(0, 1)) = 0.02
+        _WaterThicknessRange("Water Thickness Adjust", range(0, 20)) = 3
+        _Delta("Normal Distortion", Range(0, 2)) = 1
+        _RefrScale("Refraction Scale", Range(-1, 1)) = 0.5
 
+        [Space(10)] 
+        [Header(Water Frensnel Effect)]
+        _FresnelColor("Fresnel Color", Color) = (0, 0, 0, 1)
+        _FresnelValue("Fresnel Value", Range(0, 1)) = 0.02
+        _FresnelPow("Fresnel Pow", range(0, 20)) = 10
 
         [Space(20)]
+        [Header(Bottle Properties)]
         _BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
         _RimRange("Bottle Rim Range", float) = 0
         _Specular("Specular", float) = 0
         _AlphaRange("Alpha Range", Range(-1, 1)) = 0
         _Dis("Bottle Size", float) = 0
+        _FresnelValueGlass("Glass Fresnel Value", float) = 0.028
         
     }
     SubShader
@@ -43,14 +49,44 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
 			#include "UnityCG.cginc"
 			#include "Lighting.cginc"
 			#include "AutoLight.cginc"
-			#include "EsShaders_Inputs.cginc"
-			#include "EsShaders_BRDF.cginc"
-            
-            #include "EsShaders_FowardLighting.cginc"
+			#include "EsPBR/EsShaders_Inputs.cginc"
+			#include "EsPBR/EsShaders_BRDF.cginc"
+
+
+
+			#pragma skip_variants POINT POINT_COOKIE SHADOWS_CUBE VERTEXLIGHT_ON  
+
+			#include "EsPBR/EsShaders_FowardLighting.cginc"
+            //----------------Water Properties--------------
+            float _FillAmount;
+            fixed4 _WaterColor;
+            fixed4 _SurfaceColor;
+            fixed4 _FoamColor;
+            float _FoamHeight;
+
+            //----------------Wave Controller-----------
+            sampler2D _NoiseTex;
+            float4 _NoiseTex_ST;
+            float _NoiseScale;
+            float _NoiseDensity;
+            float _NoiseSpeed;
+
+            //-------------Translucence Water Effect---------
+            float _WaterThicknessValue;
+            float _WaterThicknessRange;
+            float _Delta;
+            float _RefrScale;
+
+            //----------------Water Frensnel Effect----------
+            fixed4 _FresnelColor;
+            float _FresnelValue;
+            float _FresnelPow;
+
+            float3 _WorldZeroPos;
+            float3 _ForceDir;
 
             struct a2v
             {
@@ -68,37 +104,6 @@
                 float3 worldPos : TEXCOORD3;
             };
 
-            sampler2D _NoiseTex;
-            float4 _NoiseTex_ST;
-
-            float _FillAmount;
-            float _FoamWidth;
-
-            float _NoiseScale;
-            float _NoiseFrequence;
-            float _NoiseSpeed;
-
-            fixed4 _FoamColor;
-            fixed4 _ColorWater;
-            fixed4 _SectionColor;
-            float _SectionFactor;
-
-            float _FresnelWater0;
-            float _FresnelGlass0;
-
-            float _FresnelWaterP;
-            
-            fixed4 _SurfaceColor;
-            float3 _WorldZeroPos;
-
-            float3 _ForceDir;
-
-            //-------------SubSurface------------------
-            float _Delta;
-            float _BackLightScale;
-            float _BackLightP;
-            fixed4 _FresnelColor;
-
 
             float GetWaterHeight(float3 worldPos, float height, float newHeight)
             {
@@ -111,10 +116,10 @@
                 return height + d * newHeight;// + _ForceDir.y*newHeight;
             }
 
-            float GetFresnel(float3 V, float3 H)
+            float GetFresnel(float F0, float3 V, float3 H, float powValue)
             {
-                // return _FresnelWater0 + (1 - _FresnelWater0)*pow(2, -5.55473*dot(V, H)-6.98316*dot(V, H));
-                return _FresnelWater0 + (1 - _FresnelWater0)*pow(1-dot(V, H), _FresnelWaterP);
+                // return _WaterThicknessValue + (1 - _WaterThicknessValue)*pow(2, -5.55473*dot(V, H)-6.98316*dot(V, H));
+                return F0 + (1 - _WaterThicknessValue)*pow(1-dot(V, H), powValue);
             }
 
 
@@ -137,13 +142,12 @@
                 float3 LightDir = normalize(_WorldSpaceLightPos0.xyz);
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
                 float3 halfDir = normalize(viewDir + LightDir);
-
-                float waterHeight = _NoiseScale*(tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseFrequence + normalize(_ForceDir.xz)*_Time.z*_NoiseSpeed));
-                // return tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseFrequence + normalize(float2(1, 1))*_Time.z*_NoiseSpeed).r;
+                float waterHeight = _NoiseScale*(tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseDensity + normalize(_ForceDir.xz)*_Time.z*_NoiseSpeed));
+                // return tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseDensity + normalize(float2(1, 1))*_Time.z*_NoiseSpeed).r;
 
                 i.WaterEdgeY = GetWaterHeight(i.worldPos, i.WaterEdgeY, waterHeight*2);
 
-                if(0.5+_FoamWidth-i.WaterEdgeY < 0.1)
+                if(0.5+_FoamHeight-i.WaterEdgeY < 0.1)
                 {
                     float3 horizonViewDir = viewDir;
                     horizonViewDir.y = 0;
@@ -152,11 +156,11 @@
                 if(facing<0)
                     worldNormal = float3(0, 1, 0);
 
-                float edgeVal = step(i.WaterEdgeY, 0.5+_FoamWidth) - step(i.WaterEdgeY, 0.5);
+                float edgeVal = step(i.WaterEdgeY, 0.5+_FoamHeight) - step(i.WaterEdgeY, 0.5);
                 float finalVal = (step(i.WaterEdgeY, 0.5));
 
                 fixed4 edgeCol = edgeVal * _FoamColor;
-                fixed4 col =  finalVal * _ColorWater;
+                fixed4 col =  finalVal * _WaterColor;
                 col += edgeCol;
                 // return fixed4(_ForceDir, 1);
                 if(edgeVal + finalVal < 0.01)
@@ -168,15 +172,18 @@
                 if(facing>0)
                 {
                     //---------------------SubSurface--------------------
-                    float Fvalue = GetFresnel(viewDir, worldNormal - viewDir*_Delta);
-                    fixed LightBackValue = Fvalue;
-                    color.rgb = lerp(color.rgb, _FresnelColor.rgb, LightBackValue);
-                }
-                // float value = pow(1-dot(worldNormal, viewDir),_SectionFactor);
-                // value = smoothstep(0.1, 0.3, value);
+                    float LightBackValue = GetFresnel(_WaterThicknessValue, viewDir, worldNormal - viewDir*_Delta, _WaterThicknessRange);
+                    // float3 relDir = reflect(-viewDir, worldNormal);
+                    float3 relDir = refract(-viewDir, worldNormal, _RefrScale);
 
-                
-                // color = lerp(color, _SectionColor, Fvalue);
+                    half3 giSpecular = GISpecular(relDir, i.worldPos, 0, 1);
+
+                    color.rgb += giSpecular.rgb*LightBackValue;
+                    // return LightBackValue;
+                    // return fixed4(giSpecular, 1);
+
+                    float Fvalue = GetFresnel(_FresnelValue, viewDir, worldNormal - viewDir*_Delta, _FresnelPow);
+                }
                 return color;
             }
             ENDCG
@@ -193,6 +200,14 @@
 
             #include "UnityCG.cginc"
 
+            //------------------Bottle Properties--------------
+            fixed4 _BottleColor;
+            float _RimRange;
+            float _Specular;
+            float _AlphaRange;
+            float _Dis;
+            float _FresnelValueGlass;
+
             struct a2v
             {
                 float4 vertex : POSITION;
@@ -205,14 +220,6 @@
                 float3 worldnormal : TEXCOORD1;
                 float3 worldPos : TEXCOORD2;
             };
-
-            fixed4 _BottleColor;
-            float _Dis;
-            float _RimRange;
-            float _AlphaRange;
-
-            float _Specular;
-        
 
             v2f vert (a2v v)
             {
