@@ -21,6 +21,7 @@
         [Header(Translucence Water Effect)]
         _WaterThicknessValue("Water Thickness Value", Range(0, 1)) = 0.02
         _WaterThicknessRange("Water Thickness Adjust", range(0, 20)) = 3
+        _LightBackWide("Light Back Wide", range(0.1, 2)) = 0.4
         _Delta("Normal Distortion", Range(0, 2)) = 1
         _RefrScale("Refraction Scale", Range(-1, 1)) = 0.5
 
@@ -77,6 +78,7 @@
             //-------------Translucence Water Effect---------
             float _WaterThicknessValue;
             float _WaterThicknessRange;
+            float _LightBackWide;
             float _Delta;
             float _RefrScale;
 
@@ -177,12 +179,16 @@
                     float3 relDir = refract(-viewDir, worldNormal, _RefrScale);
 
                     half3 giSpecular = GISpecular(relDir, i.worldPos, 0, 1);
+                    LightBackValue = smoothstep(0.05, _LightBackWide, LightBackValue);
+                    // return LightBackValue;
 
                     color.rgb += giSpecular.rgb*LightBackValue;
                     // return LightBackValue;
                     // return fixed4(giSpecular, 1);
 
                     float Fvalue = GetFresnel(_FresnelValue, viewDir, worldNormal - viewDir*_Delta, _FresnelPow);
+                    color.rgb += _FresnelColor.rgb * Fvalue;
+                    // return Fvalue;
                 }
                 return color;
             }
