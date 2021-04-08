@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class WaterBottle : MonoBehaviour
 {
-    public float SinSpeed;
-    public float FadeSpeed;
+    public float SinSpeed = 9;
+    public float FadeSpeed = 1;
+    public float ForceScale = 1;
     Material Bottle;
     Vector3 LastPos;
     Vector3 LastAngle;
@@ -39,6 +40,7 @@ public class WaterBottle : MonoBehaviour
         forceDir = transform.position - LastPos;
         AngleDir = transform.rotation.eulerAngles - LastAngle;
         AngleDir *= 0.05f;
+        forceDir *= ForceScale;
 
         LastFDir = Vector3.Lerp(LastFDir, new Vector3(0, 0, 0), Time.deltaTime * FadeSpeed);
         LastFAngleDir = Vector3.Lerp(LastFAngleDir, new Vector3(0, 0, 0), Time.deltaTime * FadeSpeed);
@@ -49,11 +51,8 @@ public class WaterBottle : MonoBehaviour
         Bottle.SetVector("_ForceDir", SinForceDir);
         Bottle.SetVector("_WorldZeroPos", transform.position);
         
-        Debug.Log(forceDir);
-        // if(forceDir.magnitude >= 1)
-            LastFDir += Vector3.ClampMagnitude(forceDir, forceDir.magnitude*0.15f);
-        // else
-        //     LastFDir += Vector3.ClampMagnitude(forceDir, 0.008f);
+        LastFDir += Vector3.ClampMagnitude(forceDir, forceDir.magnitude*0.15f);
+        Debug.Log(LastFDir);
         LastFAngleDir += Vector3.ClampMagnitude(AngleDir, 0.006f);
 
         LastPos = transform.position;

@@ -65,12 +65,14 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 LightDir = normalize(_WorldSpaceLightPos0.xyz);
-                float3 worldNormal = normalize(i.normal);
+                // float3 LightDir = normalize(_WorldSpaceLightPos0.xyz);
+                // float3 worldNormal = normalize(i.normal);
 
-                fixed3 diffuse = 0.5*dot(worldNormal, LightDir) + 0.5;
+                // fixed3 diffuse = 0.5*dot(worldNormal, LightDir) + 0.5;
 
-                return fixed4(diffuse, 1);
+                return tex2D(_MainTex, i.uv*2);
+
+                // return fixed4(diffuse, 1);
             }
             ENDCG
         }

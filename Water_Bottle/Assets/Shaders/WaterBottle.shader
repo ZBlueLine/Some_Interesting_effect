@@ -11,7 +11,11 @@
         _SectionFactor("Section Factor", float) = 20
         _FoamColor("Foam Color", Color) = (0, 0, 0, 1)
         _FoamWidth("Foam Width", float) = 0.1
+        _NoiseScale("Noise Scale", Range(0, 6)) = 1
+        _NoiseFrequence("Noise Frequence", Range(0, 1)) = 0.1
+        _NoiseSpeed("Noise Speed", Range(0, 5)) = 1
 
+        [Space(20)]
         _BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
         _RimRange("Bottle Rim Range", float) = 0
         _Specular("Specular", float) = 0
@@ -52,6 +56,10 @@
 
             float _FillAmount;
             float _FoamWidth;
+
+            float _NoiseScale;
+            float _NoiseFrequence;
+            float _NoiseSpeed;
 
             fixed4 _FoamColor;
             fixed4 _ColorWater;
@@ -94,8 +102,8 @@
 
                 // float waterHeight = cos(i.worldPos.x*UNITY_PI +_Time.y);
 
-                // float waterHeight = tex2D(_NoiseTex, float2(i.worldPos.x, i.worldPos.z)*0.5+(_ForceDir)*_Time.y);
-                float waterHeight = 2;
+                float waterHeight = _NoiseScale*(tex2D(_NoiseTex, (float2(i.worldPos.x, i.worldPos.z))*_NoiseFrequence + normalize(_ForceDir.xz)*_Time.z*_NoiseSpeed));
+                // float waterHeight = 2;
                 if(facing<0)
                 {
                     // float3 dx = ddx(i.worldPos);
