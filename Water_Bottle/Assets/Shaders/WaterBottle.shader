@@ -8,6 +8,7 @@
         _SurfaceColor("Water Surface Color", Color) = (0, 0, 0, 1)
         _FoamColor("Foam Color", Color) = (0, 0, 0, 1)
         _FoamHeight("Foam Height", float) = 0.1
+        _Roughness("Roughness", Range(0, 1)) = 0.9
 
 
         [Space(10)]
@@ -20,8 +21,8 @@
         [Space(10)] 
         [Header(Translucence Water Effect)]
         _WaterThicknessValue("Water Thickness Value", Range(0, 1)) = 0.02
-        _WaterThicknessRange("Water Thickness Adjust", range(0, 20)) = 3
-        _LightBackWide("Light Back Wide", range(0.1, 2)) = 0.4
+        _CenterWaterThickness("Center Water Thickness Adjust", range(0, 20)) = 3
+        _EdgeWaterThickness("Edge Water Thickness Adjust", range(0.1, 2)) = 0.4
         _Delta("Normal Distortion", Range(0, 2)) = 1
         _RefrScale("Refraction Scale", Range(-1, 1)) = 0.5
 
@@ -67,6 +68,7 @@
             fixed4 _SurfaceColor;
             fixed4 _FoamColor;
             float _FoamHeight;
+            fixed _Roughness;
 
             //----------------Wave Controller-----------
             sampler2D _NoiseTex;
@@ -77,8 +79,8 @@
 
             //-------------Translucence Water Effect---------
             float _WaterThicknessValue;
-            float _WaterThicknessRange;
-            float _LightBackWide;
+            float _CenterWaterThickness;
+            float _EdgeWaterThickness;
             float _Delta;
             float _RefrScale;
 
@@ -174,12 +176,13 @@
                 if(facing>0)
                 {
                     //---------------------SubSurface--------------------
-                    float LightBackValue = GetFresnel(_WaterThicknessValue, viewDir, worldNormal - viewDir*_Delta, _WaterThicknessRange);
+                    float LightBackValue = GetFresnel(_WaterThicknessValue, viewDir, worldNormal - viewDir*_Delta, _CenterWaterThickness);
                     // float3 relDir = reflect(-viewDir, worldNormal);
-                    float3 relDir = refract(-viewDir, worldNormal, _RefrScale);
+                    float3 relDir = refract(viewDir, worldNormal, _RefrScale);
 
-                    half3 giSpecular = GISpecular(relDir, i.worldPos, 0, 1);
-                    LightBackValue = smoothstep(0.05, _LightBackWide, LightBackValue);
+                    half3 giSpecular = GISpecular(relDir, i.worldPos, _Roughness*_Roughness, 1);
+                    // return fixed4(giSpecular, 1);
+                    LightBackValue = smoothstep(0.05, _EdgeWaterThickness, LightBackValue);
                     // return LightBackValue;
 
                     color.rgb += giSpecular.rgb*LightBackValue;
@@ -188,7 +191,7 @@
 
                     float Fvalue = GetFresnel(_FresnelValue, viewDir, worldNormal - viewDir*_Delta, _FresnelPow);
                     color.rgb += _FresnelColor.rgb * Fvalue;
-                    // return Fvalue;
+                    // return Fvalue;   
                 }
                 return color;
             }
