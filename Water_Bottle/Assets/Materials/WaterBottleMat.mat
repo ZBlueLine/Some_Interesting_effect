@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: e429b321b1ad86649b4fdc1919e8c512, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1d090353d12f3fc49a05b648eb64e01b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -60,21 +60,24 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AlphaRange: 0.52
+    - _AlphaRange: 1
     - _BackLightP: 19
     - _BackLightScale: 15.82
+    - _BottleRoughness: 0.257
     - _BumpScale: 1
+    - _CenterWaterThickness: 3.36
     - _Cutoff: 0.5
-    - _Delta: 0.137
+    - _Delta: 0
     - _DetailNormalMapScale: 1
-    - _Dis: 0.05
+    - _Dis: 0.038
     - _DstBlend: 0
+    - _EdgeWaterThickness: 0.182
     - _EdgeWidth: 0.08
     - _FillAmount: -0.16
-    - _FoamHeight: 0.28
+    - _FoamHeight: 0.11
     - _FoamWidth: 0.1
     - _FresnelGlass0: 0.16
-    - _FresnelPow: 4.25
+    - _FresnelPow: 0.9
     - _FresnelValue: 0.059
     - _FresnelValueGlass: 0.028
     - _FresnelWater0: 0
@@ -89,31 +92,33 @@ Material:
     - _LiquidRimScale: 0.2
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseDensity: 0.237
+    - _NoiseDensity: 0.4
     - _NoiseFrequence: 0.171
-    - _NoiseScale: 2.53
+    - _NoiseScale: 2.2
     - _NoiseSpeed: 0.39
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Raduis: 0.1
     - _RefrScale: -0.397
-    - _RimRange: 2.6
+    - _RimRange: 2.92
     - _RimScale: 1.1
     - _RimWidth: -0.62
+    - _Roughness: 0.183
     - _SectionFactor: 20
     - _SmoothnessTextureChannel: 0
-    - _Specular: 34.46
+    - _Specular: 11.8
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
+    - _WaterRoughness: 0.128
     - _WaterThicknessRange: 3.15
-    - _WaterThicknessValue: 0
+    - _WaterThicknessValue: 0.015
     - _WaveHeight: 1
     - _ZWrite: 1
     - _refrValue: 0.2
     m_Colors:
     - _BackColor: {r: 0.8265168, g: 1, b: 0.8254717, a: 1}
-    - _BottleColor: {r: 0.8726415, g: 1, b: 0.9310362, a: 1}
+    - _BottleColor: {r: 1, g: 0, b: 0, a: 1}
     - _CameraOffset: {r: 0.2, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorBack: {r: 0.7169812, g: 0.064257726, b: 0.064257726, a: 1}

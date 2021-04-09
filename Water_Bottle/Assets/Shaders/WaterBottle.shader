@@ -8,12 +8,12 @@
         _SurfaceColor("Water Surface Color", Color) = (0, 0, 0, 1)
         _FoamColor("Foam Color", Color) = (0, 0, 0, 1)
         _FoamHeight("Foam Height", float) = 0.1
-        _Roughness("Roughness", Range(0, 1)) = 0.9
+        _WaterRoughness("Water Roughness", Range(0, 1)) = 0.9
 
 
         [Space(10)]
         [Header(Wave Controller)]
-        _NoiseTex ("Water Texture", 2D) = "white" {}
+        _NoiseTex ("Water Noise Texture", 2D) = "white" {}
         _NoiseScale("Water Wave Scale", Range(0, 6)) = 3.9
         _NoiseDensity("Water Wave Density", Range(0, 1)) = 0.18
         _NoiseSpeed("Wave Move Speed", Range(0, 5)) = 0.8
@@ -21,25 +21,25 @@
         [Space(10)] 
         [Header(Translucence Water Effect)]
         _WaterThicknessValue("Water Thickness Value", Range(0, 1)) = 0.02
-        _CenterWaterThickness("Center Water Thickness Adjust", range(0, 20)) = 3
-        _EdgeWaterThickness("Edge Water Thickness Adjust", range(0.1, 2)) = 0.4
-        _Delta("Normal Distortion", Range(0, 2)) = 1
+        _CenterWaterThickness("Center Water Turbid Degree", range(0, 20)) = 3
+        _EdgeWaterThickness("Edge Water Turbid Degree", range(0.1, 2)) = 0.4
         _RefrScale("Refraction Scale", Range(-1, 1)) = 0.5
+        // _Delta("Normal Distortion", Range(0, 2)) = 1
 
         [Space(10)] 
         [Header(Water Frensnel Effect)]
         _FresnelColor("Fresnel Color", Color) = (0, 0, 0, 1)
         _FresnelValue("Fresnel Value", Range(0, 1)) = 0.02
-        _FresnelPow("Fresnel Pow", range(0, 20)) = 10
+        _FresnelPow("Fresnel Range", Range(0, 5)) = 5
 
         [Space(20)]
         [Header(Bottle Properties)]
         _BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
-        _RimRange("Bottle Rim Range", float) = 0
-        _Specular("Specular", float) = 0
-        _AlphaRange("Alpha Range", Range(-1, 1)) = 0
-        _Dis("Bottle Size", float) = 0
-        _FresnelValueGlass("Glass Fresnel Value", float) = 0.028
+        _RimRange("Bottle Rim Range", Range(0, 10)) = 0
+        _Specular("Specular", Range(0, 40)) = 0
+        _AlphaRange("Alpha Range", Range(0, 1)) = 0
+        _Dis("Bottle Size", Range(0, 1)) = 0
+        _BottleRoughness("Bottle Roughness", Range(0, 1)) = 0.9
         
     }
     SubShader
@@ -59,16 +59,16 @@
 
 
 
-			#pragma skip_variants POINT POINT_COOKIE SHADOWS_CUBE VERTEXLIGHT_ON  
+			// #pragma skip_variants POINT POINT_COOKIE SHADOWS_CUBE VERTEXLIGHT_ON  
 
-			#include "EsPBR/EsShaders_FowardLighting.cginc"
+			// #include "EsPBR/EsShaders_FowardLighting.cginc"
             //----------------Water Properties--------------
             float _FillAmount;
             fixed4 _WaterColor;
             fixed4 _SurfaceColor;
             fixed4 _FoamColor;
             float _FoamHeight;
-            fixed _Roughness;
+            fixed _WaterRoughness;
 
             //----------------Wave Controller-----------
             sampler2D _NoiseTex;
@@ -81,7 +81,7 @@
             float _WaterThicknessValue;
             float _CenterWaterThickness;
             float _EdgeWaterThickness;
-            float _Delta;
+            // float _Delta;
             float _RefrScale;
 
             //----------------Water Frensnel Effect----------
@@ -176,20 +176,17 @@
                 if(facing>0)
                 {
                     //---------------------SubSurface--------------------
-                    float LightBackValue = GetFresnel(_WaterThicknessValue, viewDir, worldNormal - viewDir*_Delta, _CenterWaterThickness);
-                    // float3 relDir = reflect(-viewDir, worldNormal);
+                    float LightBackValue = GetFresnel(_WaterThicknessValue, viewDir, worldNormal/* - viewDir*_Delta*/, _CenterWaterThickness);
                     float3 relDir = refract(viewDir, worldNormal, _RefrScale);
 
-                    half3 giSpecular = GISpecular(relDir, i.worldPos, _Roughness*_Roughness, 1);
+                    half3 giSpecular = GISpecular(relDir, i.worldPos, _WaterRoughness*_WaterRoughness, 1);
                     // return fixed4(giSpecular, 1);
                     LightBackValue = smoothstep(0.05, _EdgeWaterThickness, LightBackValue);
                     // return LightBackValue;
 
                     color.rgb += giSpecular.rgb*LightBackValue;
-                    // return LightBackValue;
-                    // return fixed4(giSpecular, 1);
 
-                    float Fvalue = GetFresnel(_FresnelValue, viewDir, worldNormal - viewDir*_Delta, _FresnelPow);
+                    float Fvalue = GetFresnel(_FresnelValue, viewDir, worldNormal/* - viewDir*_Delta*/, _FresnelPow);
                     color.rgb += _FresnelColor.rgb * Fvalue;
                     // return Fvalue;   
                 }
@@ -208,6 +205,9 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+			#include "Lighting.cginc"
+			#include "AutoLight.cginc"
+			#include "EsPBR/EsShaders_BRDF.cginc"
 
             //------------------Bottle Properties--------------
             fixed4 _BottleColor;
@@ -215,7 +215,7 @@
             float _Specular;
             float _AlphaRange;
             float _Dis;
-            float _FresnelValueGlass;
+            fixed _BottleRoughness;
 
             struct a2v
             {
@@ -249,15 +249,17 @@
                 float3 LightDir = normalize(_WorldSpaceLightPos0.xyz);
                 float3 H = normalize(LightDir + viewDir);
 
+
+                float3 relDir = reflect(-viewDir, worldNormal);
+                fixed3 giSpecular = GISpecular(relDir, i.worldPos, _BottleRoughness*_BottleRoughness, 1);
+                half specular = pow(max(0, dot(H, worldNormal)), _Specular);
+
+                // giSpecular = lerp(giSpecular, _BottleColor, 0.5);
                 float NdotV = max(0, dot(worldNormal, viewDir));
-
-                float specular = _BottleColor * pow(max(0, dot(H, worldNormal)), _Specular);
-                float diffuse = _BottleColor * max(0, dot(worldNormal, LightDir));
-
                 float alpha = pow(1 - NdotV, _RimRange);
-                fixed3 rim = _BottleColor * alpha;
+                fixed3 rim = giSpecular * alpha;
 
-                return fixed4(diffuse + specular + rim, alpha*_AlphaRange + specular*_AlphaRange);
+                return fixed4(specular*_LightColor0.rgb + rim + giSpecular, alpha*_AlphaRange + specular*_AlphaRange);
             }
             ENDCG
         }
