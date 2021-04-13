@@ -1,14 +1,24 @@
-﻿Shader "Unlit/LiquidBottle"
+﻿    Shader "EsShaders/LiquidBottle"
 {
     Properties
     {
         [Header(Liquid Properties)]
-        _FillAmount("Fill Amount", float) = 0
-        _LiquidColor("Liquid Color", Color) = (0, 0, 0, 1)
-        _SurfaceColor("Liquid Surface Color", Color) = (0, 0, 0, 1)
-        _FoamColor("Foam Color", Color) = (0, 0, 0, 1)
+        _FillAmount("Fill Amount", Range(-3, 3)) = 3
+        _ModleCenterPos("Modle Center Pos (Object Space)", Vector) = (0, 0, 0, 1)
+
+        [Toggle(_USE_GRADUAL_TEXTURE)]_USE_GRADUAL_TEXTURE("Enable", float) = 0
+        [NoScaleOffset]_LiquidGradualTexture("Liquid Gradual Texture", 2D) = "white" {}
+        _GradualScale("Gradual Scale", float) = 1
+        _GradualOffset("Gradual Offset", float) = 1
+        [HDR]_LiquidColor("Liquid Color", Color) = (0, 0, 0, 1)
+        [HDR]_SurfaceColor("Liquid Surface Color", Color) = (0, 0, 0, 1)
+        [HDR]_FoamColor("Foam Color", Color) = (0, 0.5, 0, 1)
         _FoamHeight("Foam Height", float) = 0.1
         _LiquidRoughness("Liquid Roughness", Range(0, 1)) = 0.9
+        
+        [Header(Liquid Tension)]
+        _LiquidTension("Liquid Tension", Range(0, 40)) = 30
+        _LiquidEdgeDrop("Liquid Edge Drop", Range(-0.07, 0.07)) = 0.02
 
 
         [Space(10)]
@@ -28,16 +38,17 @@
 
         [Space(10)] 
         [Header(Liquid Frensnel Effect)]
-        _LiquidFresnelColor("Liquid Fresnel Color", Color) = (0, 0, 0, 1)
+        [HDR]_LiquidFresnelColor("Liquid Fresnel Color", Color) = (0, 0, 0, 1)
         _LiquidFresnelValue("Liquid Fresnel Value", Range(0, 1)) = 0.02
         _LiquidFresnelPow("Liquid Fresnel Power", Range(0, 20)) = 5
 
         [Space(20)]
         [Header(Bottle Properties)]
-        _BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
+        [HDR]_BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
         _BottleSize("Bottle Size", Range(0, 1)) = 0
         _BottleRoughness("Bottle Roughness", Range(0, 1)) = 0.9
         _BottleMinAlpha("Bottle Min Alpha", Range(0, 1)) = 0.1
+        _BottleAlpahRange("Bottle Alpah Range", Range(0, 1)) = 1
 
         _BottleRimPower("Bottle Rim Power", Range(0, 9)) = 0
         _SpecularPower("Specular Power", Range(0, 100)) = 20
@@ -46,14 +57,46 @@
         [Header(Bottle Frensnel Effect)]
         _BottleFresnelColor("Bottle Fresnel Color", Color) = (0, 0, 0, 1)
         _BottleFresnelValue("Bottle Fresnel Value", Range(0, 1)) = 0.02
-        _BottleFresnelPow("Bottle Fresnel Power", Range(0, 10)) = 5
+        _BottleFresnelPow("Bottle Fresnel Power", Range(0, 30)) = 5
+
+        //----------------ParallaxMap--------------------------
+
+        [Toggle(_PARALLAX_MAP)]_parallax_map("using Parallax Map", float) = 0
+        _ParallaxTexture("Parallax Texture", 2D) = "black" {}
+        // _ParallaxScale("Parallax Scale", Range(0, 0.1)) = 0.05
         
+        _BubbleTexture("Bubble Color Texture", 2D) = "black" {}
+        _BubbleTexture2("Bubble Color Texture 2", 2D) = "black" {}
+        // [NoScaleOffset]_BubbleNormalTexture("BubbleNormal Texture", 2D) = "white" {}
+        _BubbleInnerColor("Bubble Inner Color", Color) = (1, 1, 1, 1)
+        _BubbleOuterColor("Bubble Outer Color", Color) = (1, 1, 1, 1)
+        _MinValue("MinValue", Range(0, 1)) = 0.9
+        _MaxValue("MaxValue", Range(0, 1)) = 0.9
+
+		_LayerHeightBias("Layer Height Start Bias", Range(0.0, 1)) = 0.2
+        [Toggle(EnableLayer1)] _EnableLayer1("Enable", float) = 0
+        _Layer1SpeedX("_Layer1 Speed X", float) = 1
+        _Layer1SpeedY("_Layer1 Speed Y", float) = 1
+        
+        [Toggle(EnableLayer2)] _EnableLayer2("Enable", float) = 0
+        _Layer2SpeedX("_Layer2 Speed X", float) = 1
+        _Layer2SpeedY("_Layer2 Speed Y", float) = 1
+
+        [Toggle(EnableLayer3)] _EnableLayer3("Enable", float) = 0
+        _Layer3SpeedX("_Layer3 Speed X", float) = 1
+        _Layer3SpeedY("_Layer3 Speed Y", float) = 1
+        //----------------ParallaxMap--------------------------
     }
 
     CGINCLUDE
+	#include "UnityCG.cginc"
+	#include "Lighting.cginc"
+	#include "AutoLight.cginc"
+	#include "EsPBR/EsShaders_Inputs.cginc"
+	#include "EsPBR/EsShaders_BRDF.cginc"
     half3 _WorldZeroPos;
     half3 _ForceDir;
-    half GetLiquidHeight(half3 worldPos, half originHeight, half waveHeight)
+    inline half CalcLiquidCutHeight(half3 worldPos, half originHeight, half waveHeight)
     {
         half3 posToCenterDir = half3(worldPos.x, 0, worldPos.z) - half3(_WorldZeroPos.x, 0, _WorldZeroPos.z);
         _ForceDir.xz += _ForceDir.y;
@@ -62,9 +105,9 @@
         return originHeight + degree * waveHeight;
     }
 
-    half GetFresnel(half f0, half3 v, half3 h, half powValue)
+    inline half FresnelTerm(half f0, half vDotn, half powValue)
     {
-        return f0 + (1 - f0)*pow(1-dot(v, h), powValue);
+        return f0 + (1 - f0) * pow(1-vDotn, powValue);
 
         //another Fresnel function
         // return _LiquidThicknessValue + (1 - _LiquidThicknessValue)*pow(2, -5.55473*dot(V, H)-6.98316*dot(V, H));
@@ -79,21 +122,42 @@
         {
             Cull OFF
             CGPROGRAM
+
             #pragma vertex vert
             #pragma fragment frag
-			#include "UnityCG.cginc"
-			#include "Lighting.cginc"
-			#include "AutoLight.cginc"
-			#include "EsPBR/EsShaders_Inputs.cginc"
-			#include "EsPBR/EsShaders_BRDF.cginc"
+
+            //----------------ParallaxMap--------------------------
+#ifdef _PARALLAX_MAP
+            #pragma shader_feature _PARALLAX_MAP
+            #pragma shader_feature PARALLAX_OFFSET_LIMITING
+            #pragma shader_feature EnableLayer1
+            #pragma shader_feature EnableLayer2
+            #pragma shader_feature EnableLayer3
+            #pragma shader_feature _PARALLAX_FUNCTION
+			// #define _PARALLAX_FUNCTION ParallaxRaymarching
+            #include "EsShaders_ParallaxMap.cginc"
+#endif
+            // //----------------ParallaxMap--------------------------
+
+            #pragma shader_feature _USE_GRADUAL_TEXTURE
+
 
             //----------------Liquid Properties--------------
+            sampler2D _LiquidGradualTexture;
+            half _GradualScale;
+            half _GradualOffset;
+
             half _FillAmount;
+            half3 _ModleCenterPos;
+
             fixed4 _LiquidColor;
             fixed4 _SurfaceColor;
             fixed4 _FoamColor;
             half _FoamHeight;
             fixed _LiquidRoughness;
+
+            half _LiquidTension;
+            half _LiquidEdgeDrop;
 
             //----------------Wave Controller-----------
             sampler2D _WaveTex;
@@ -114,11 +178,16 @@
             half _LiquidFresnelValue;
             half _LiquidFresnelPow;
 
+            //-------------------_Parallax---------------------
+            sampler2D _BubbleNormalTexture;
+            half4 _BubbleNormalTexture_ST;
+
             struct a2v
             {
                 half4 vertex : POSITION;
                 half2 uv : TEXCOORD0;
                 half3 normal : NORMAL;
+                half4 tangent : TANGENT;
             };
 
             struct v2f
@@ -127,39 +196,52 @@
                 half4 vertex : SV_POSITION;
                 half liquidHeightYaxisValue : TEXCOORD1;
                 half3 worldnormal : TEXCOORD2;
-                half3 worldPos : TEXCOORD3;
+                half4 worldPos : TEXCOORD3;
+                half3 tangentViewDir : TEXCOORD4;
             };
             v2f vert (a2v v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _WaveTex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-                o.worldnormal = UnityObjectToWorldNormal(v.normal);
 
-                o.liquidHeightYaxisValue = o.worldPos.y - _WorldZeroPos.y - _FillAmount;
+                o.uv = v.uv;
+
+                o.worldPos.xyz = mul(unity_ObjectToWorld, v.vertex);
+                o.worldnormal = UnityObjectToWorldNormal(v.normal);
+                
+				o.tangentViewDir = TangentSpaceViewDir(v.tangent.xyz, cross(v.normal, v.tangent.xyz) * v.tangent.w, v.normal, ObjSpaceViewDir(v.vertex));
+
+                //CenterPos
+                o.worldPos.w = mul(unity_ObjectToWorld, float4(_ModleCenterPos.xyz, 1)).y;
+
+                o.liquidHeightYaxisValue = o.worldPos.y - o.worldPos.w - _FillAmount;
                 return o;
             }
 
             fixed4 frag (v2f i, fixed facing : VFace) : SV_Target
             {
+                
                 half3 worldNormal = normalize(i.worldnormal);
                 half3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
                 half3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
                 half3 halfDir = normalize(viewDir + lightDir);
+
+                //random wave
                 half waterHeight = _LiquidWaveIntensity*(tex2D(_WaveTex, (half2(i.worldPos.x, i.worldPos.z))*_LiquidWaveDensity + normalize(_ForceDir.xz)*_Time.z*_WaveMoveSpeed));
 
-                i.liquidHeightYaxisValue = GetLiquidHeight(i.worldPos, i.liquidHeightYaxisValue, waterHeight);
-
-                //------------Liquid edge tension------------
+                i.liquidHeightYaxisValue = CalcLiquidCutHeight(i.worldPos, i.liquidHeightYaxisValue, waterHeight);
 
                 //if only want foam partion have tension, add this if statement
                 // if(0.5+_FoamHeight-i.liquidHeightYaxisValue < 0.1)
                 // {
+
+                //------------Liquid edge tension------------
                 half3 horizonViewDir = viewDir;
                 horizonViewDir.y = 0;
+                i.liquidHeightYaxisValue = lerp(i.liquidHeightYaxisValue, i.liquidHeightYaxisValue + _LiquidEdgeDrop, pow((cos(dot(horizonViewDir, worldNormal))-0.5)*2, _LiquidTension));
+                
+                //------------Liquid edge tension------------
 
-                i.liquidHeightYaxisValue = lerp(i.liquidHeightYaxisValue, i.liquidHeightYaxisValue + 0.07, pow((cos(dot(horizonViewDir, worldNormal))-0.5)*2, 5));
                 // }
 
                 if(facing<0)
@@ -169,7 +251,14 @@
                 half foamHeightVal = step(i.liquidHeightYaxisValue, 0.5+_FoamHeight) - step(i.liquidHeightYaxisValue, 0.5);
                 half liquidVal = (step(i.liquidHeightYaxisValue, 0.5));
                 fixed4 foamCol = foamHeightVal * _FoamColor;
-                fixed4 liquidCol =  liquidVal * _LiquidColor;
+
+                #ifdef _USE_GRADUAL_TEXTURE
+                    fixed4 liquidGradualColor = tex2D(_LiquidGradualTexture, _GradualScale*half2(i.worldPos.y-i.worldPos.w, 0.5) - _GradualOffset);
+                    fixed4 liquidCol =  liquidVal * _LiquidColor * liquidGradualColor;
+                #else 
+                    fixed4 liquidCol =  liquidVal * _LiquidColor;
+                #endif
+
                 liquidCol += foamCol;
 
                 if(foamHeightVal + liquidVal < 0.01)
@@ -181,16 +270,32 @@
                 //------------------LiquidEdge SubSurface--------------------
                 if(facing>0)
                 {
-                    half lightBackValue = GetFresnel(_LiquidThicknessValue, viewDir, worldNormal/* - viewDir*_Delta*/, _LiquidInnerThickness);
+                    half vDotn = max(0, dot(viewDir, worldNormal));
+                    half giSpecularRange = FresnelTerm(_LiquidThicknessValue, vDotn, _LiquidInnerThickness);
+                    
                     half3 refDir = refract(-viewDir, worldNormal, _Refractive);
 
                     half3 giSpecular = GISpecular(refDir, i.worldPos, _LiquidRoughness*_LiquidRoughness, 1);
-                    lightBackValue = smoothstep(0.05, _LiquidOutterThickness, lightBackValue);
+                    giSpecularRange = smoothstep(0.05, _LiquidOutterThickness, giSpecularRange);
+                    finalColor.rgb += giSpecular.rgb*giSpecularRange;
 
-                    finalColor.rgb += giSpecular.rgb*lightBackValue;
-
-                    half fValue = GetFresnel(_LiquidFresnelValue, viewDir, worldNormal/* - viewDir*_Delta*/, _LiquidFresnelPow);
+                    half fValue = FresnelTerm(_LiquidFresnelValue, vDotn, _LiquidFresnelPow);  
                     finalColor.rgb = lerp(finalColor.rgb, _LiquidFresnelColor.rgb , fValue);
+
+
+                    //--------------------Parallax-----------------------------
+                    
+                    half2 viewDirToCenter = (_WorldZeroPos.xz - _WorldSpaceCameraPos.xz);
+                    half2 leftDir = normalize(half2(-viewDirToCenter.y, viewDirToCenter.x));
+                    half2 dirToCenterPos = _WorldZeroPos.xz - leftDir*2 - i.worldPos.xz;
+                    // return fixed4(i.worldPos.xz, 0, 1);
+                    
+                    half2 palneuv = half2(dot(leftDir,dirToCenterPos), i.worldPos.y);
+                    // return fixed4(palneuv, 0, 1);
+#ifdef _PARALLAX_MAP
+                    return fixed4(ApplyParallax(normalize(i.tangentViewDir), i.uv , 1).rgb*_BubbleOuterColor.a*liquidVal,1);
+                    finalColor.rgb += ApplyParallax(normalize(i.tangentViewDir), i.uv, 1).rgb*_BubbleOuterColor.a*liquidVal;
+#endif
                 }
                 return finalColor;
             }
@@ -205,11 +310,6 @@
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
-			#include "Lighting.cginc"
-			#include "AutoLight.cginc"
-			#include "EsPBR/EsShaders_BRDF.cginc"
-
             //------------------Bottle Properties--------------
             fixed4 _BottleColor;
             fixed _BottleMinAlpha;
@@ -218,6 +318,7 @@
             half _BottleBrightness;
             half _BottleSize;
             fixed _BottleRoughness;
+            half _BottleAlpahRange;
 
             fixed4 _BottleFresnelColor;
             half _BottleFresnelValue;
@@ -263,10 +364,11 @@
                 half nDotv = max(0, dot(worldNormal, viewDir));
                 half alpha = pow(1 - nDotv, _BottleRimPower);
                 alpha = max(_BottleMinAlpha, saturate(alpha+specular));
-
-                half fValue = GetFresnel(_BottleFresnelValue, viewDir, worldNormal, _BottleFresnelPow);
+                alpha *= _BottleAlpahRange;
                 fixed4 finalCol = fixed4(specular*_LightColor0.rgb + giSpecular, alpha);
-                finalCol = lerp(finalCol, _BottleFresnelColor, fValue);
+
+                half fValue = FresnelTerm(_BottleFresnelValue, max(0, dot(viewDir, worldNormal)), _BottleFresnelPow);                
+                finalCol.rgb = lerp(finalCol.rgb, _BottleFresnelColor.rgb, fValue);
                 return finalCol;
             }
             ENDCG
