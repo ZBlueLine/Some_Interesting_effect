@@ -9,9 +9,6 @@ All feature
 */
 
 half _ParallaxScale;
-half _LayerHeightBias;
-fixed4 _BubbleInnerColor;
-fixed4 _BubbleOuterColor;
 
 half _MinValue;
 half _MaxValue;
@@ -19,10 +16,22 @@ half _MaxValue;
 sampler2D _ParallaxTexture;
 half4 _ParallaxTexture_ST;
 
+sampler2D _BackGroundNoise;
+half4 _BackGroundNoise_ST;
+half _NoiseSpeedX;
+half _NoiseSpeedY;
+
 sampler2D _BubbleTexture;
-half4 _BubbleTexture_ST;
-sampler2D _BubbleTexture2;
-half4 _BubbleTexture2_ST;
+
+fixed4 _BubbleInnerColor;
+fixed4 _BubbleOuterColor;
+
+half _Buble1SizeX;
+half _Buble1SizeY;
+half _Buble2SizeX;
+half _Buble2SizeY;
+half _Buble2OffsetX;
+half _Buble2OffsetY;
 
 half _Layer1SpeedX;
 half _Layer1SpeedY;
@@ -31,20 +40,90 @@ half _Layer2SpeedY;
 half _Layer3SpeedX;
 half _Layer3SpeedY;
 
+half _Layer1HeightBias;
+half _Layer2HeightBias;
+half _Layer3HeightBias;
+
 #ifdef _PARALLAX_MAP
 	half GetParallaxHeight (float2 uv) 
 	{
-		return smoothstep(0.9, 0.99, tex2D(_ParallaxTexture, uv).r);
+		return tex2D(_ParallaxTexture, uv);
 	}
 	float2 ParallaxOffset (float2 uv, float2 viewDir, half layerHeightBiasAccum) 
 	{
 		
 		half height = GetParallaxHeight(uv);
+		height -= layerHeightBiasAccum;
 		height -= 0.5;
 		height *= _ParallaxScale;
-		height -= layerHeightBiasAccum;
-		return viewDir * height*_ParallaxTexture_ST.xy;
+		return viewDir * height;
 	}
+
+	//切线空间视线向量（指向相机）,视差贴图的uv, 视差贴图, 视差强度
+	fixed4 ApplyParallax (in float3 tangentViewDir, in float2 uv, in half speedScale) 
+	{
+		tangentViewDir = normalize(tangentViewDir);
+		#ifndef _OFFSET_LIMITING
+			#ifndef PARALLAX_BIAS
+				#define PARALLAX_BIAS 0.42
+			#endif	
+			half2 newViewDir = tangentViewDir.xy/(tangentViewDir.z + PARALLAX_BIAS);
+		#else
+			half2 newViewDir = tangentViewDir.xy;
+		#endif
+
+		#if !defined(_PARALLAX_FUNCTION)
+			#define _PARALLAX_FUNCTION ParallaxOffset
+
+		half layerHeightBiasAccum = 0;
+		#endif
+
+		float2 offset = 0;
+		fixed4 Col = (0, 0, 0, 0);
+		half2 layerBaseUV;
+		
+#ifdef EnableLayer1
+
+		layerHeightBiasAccum = _Layer1HeightBias;
+		layerBaseUV = (uv-0.5)*half2(_Buble1SizeX,_Buble1SizeY) + 0.5 + _Time.x* float2(_Layer1SpeedX,_Layer1SpeedY)+float2(0, 3);
+		offset = _PARALLAX_FUNCTION(layerBaseUV, newViewDir, layerHeightBiasAccum);
+
+		layerBaseUV += offset *half2(_Buble1SizeX,_Buble1SizeY);
+		Col += tex2D(_BubbleTexture, layerBaseUV);
+		// return tex2D(_BackGroundNoise, noiseUv);
+#endif 
+
+#ifdef EnableLayer2
+		layerHeightBiasAccum = _Layer2HeightBias;
+
+		layerBaseUV = (uv-0.5)*half2(_Buble1SizeX,_Buble1SizeY) + 0.5 + (_Time.x * float2(_Layer2SpeedX,_Layer2SpeedY));
+		offset = _PARALLAX_FUNCTION(layerBaseUV, newViewDir, layerHeightBiasAccum);
+
+		layerBaseUV += offset *half2(_Buble1SizeX,_Buble1SizeY);
+		Col += tex2D(_BubbleTexture, layerBaseUV);
+#endif 
+
+#ifdef EnableLayer3
+		layerHeightBiasAccum = _Layer3HeightBias;
+
+		layerBaseUV = (uv-0.5)*half2(_Buble1SizeX,_Buble1SizeY) + 0.5 + (fmod(_Time.x,1) * float2(_Layer3SpeedX,_Layer3SpeedY));
+		offset = _PARALLAX_FUNCTION(layerBaseUV, newViewDir, layerHeightBiasAccum);
+
+		layerBaseUV += offset *half2(_Buble1SizeX,_Buble1SizeY);
+		Col += tex2D(_BubbleTexture, layerBaseUV);
+#endif 
+		Col = saturate(Col);
+		half2 noiseUv = uv*_BackGroundNoise_ST.xy + _Time.x * float2(_NoiseSpeedX, _NoiseSpeedY);
+		Col += (tex2D(_BackGroundNoise, noiseUv)-0.5)*2;
+
+		fixed4 finalColor = lerp(_BubbleOuterColor, _BubbleInnerColor, Col.r*0.5+0.5);
+#ifdef _ENABLE_COLORSTEP
+		Col.r = smoothstep(_MinValue, _MaxValue, Col.r);
+#endif 
+		
+		return fixed4(finalColor.rgb * Col.r, Col.r);
+	}
+
 
 	//Raymarching Parallax
 	// float2 ParallaxRaymarching (float2 uv, float2 viewDir, half layerHeightBiasAccum) {
@@ -106,68 +185,4 @@ half _Layer3SpeedY;
 	// 	#endif
 	// 	return uvOffset;
 	// }
-
-	//切线空间视线向量（指向相机）,视差贴图的uv, 视差贴图, 视差强度
-	fixed3 ApplyParallax (in float3 tangentViewDir, in float2 uv, in half speedScale) 
-	{
-		tangentViewDir = normalize(tangentViewDir);
-		#ifndef _OFFSET_LIMITING
-			#ifndef PARALLAX_BIAS
-				#define PARALLAX_BIAS 0.42
-			#endif	
-			half2 newCoords = tangentViewDir.xy/(tangentViewDir.z + PARALLAX_BIAS);
-		#else
-			half2 newCoords = tangentViewDir.xy;
-		#endif
-
-		#if !defined(_PARALLAX_FUNCTION)
-			#define _PARALLAX_FUNCTION ParallaxOffset
-
-		half layerHeightBiasAccum = 0;
-		#endif
-
-		float2 offset = _PARALLAX_FUNCTION(uv.xy, newCoords, layerHeightBiasAccum);
-		fixed4 Col = (0, 0, 0, 0);
-		half2 layerBaseUV;
-		
-		#ifdef EnableLayer1
-
-			layerHeightBiasAccum += _LayerHeightBias;
-			layerBaseUV = uv*_BubbleTexture_ST.xy  + _Time.x * (half2(_Layer1SpeedX, _Layer1SpeedY));
-			offset = _PARALLAX_FUNCTION(layerBaseUV, newCoords, layerHeightBiasAccum);
-			layerBaseUV += offset;
-
-			Col += tex2D(_BubbleTexture, layerBaseUV);
-		#endif 
-
-		#ifdef EnableLayer2
-			layerHeightBiasAccum += _LayerHeightBias;
-
-			layerBaseUV = uv*_BubbleTexture_ST.xy + _Time.x * half2(_Layer2SpeedX, _Layer2SpeedY);
-			offset = _PARALLAX_FUNCTION(layerBaseUV, newCoords, layerHeightBiasAccum);
-			layerBaseUV += offset;
-
-			Col += tex2D(_BubbleTexture, layerBaseUV);
-		#endif 
-
-		#ifdef EnableLayer3
-			layerHeightBiasAccum += _LayerHeightBias;
-
-			layerBaseUV = uv*_BubbleTexture_ST.xy + _Time.x * float2(_Layer3SpeedX,_Layer3SpeedY);
-			offset = _PARALLAX_FUNCTION(layerBaseUV, newCoords, layerHeightBiasAccum);
-			layerBaseUV += offset;
-
-			Col += tex2D(_BubbleTexture, uv*_BubbleTexture_ST.xy + _Time.x * float2(_Layer3SpeedX,_Layer3SpeedY));
-			Col += tex2D(_BubbleTexture2, uv*_BubbleTexture2_ST.xy + _BubbleTexture2_ST.zw);
-		#endif 
-		// Col.r *= 1.;
-		// Col.r = pow(Col.r, 2);
-		fixed4 finalColor = lerp(_BubbleOuterColor, _BubbleInnerColor, Col.r);
-		Col.r = smoothstep(_MinValue, _MaxValue, Col.r);
-		// finalColor = pow(finalColor, 5);
-		// Col.r = pow(Col.r, 1);
-		// Col.r *= 0.9;
-		// Col.r  = smoothstep(0.9, 0.99, Col.r);
-		return finalColor * Col.r;
-	}
 #endif

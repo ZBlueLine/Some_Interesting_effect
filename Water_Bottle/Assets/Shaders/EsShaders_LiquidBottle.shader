@@ -3,18 +3,20 @@
     Properties
     {
         [Header(Liquid Properties)]
-        _FillAmount("Fill Amount", Range(-3, 3)) = 3
+        _FillAmount("Fill Amount", Range(-2, 2)) = -0.5
         _ModleCenterPos("Modle Center Pos (Object Space)", Vector) = (0, 0, 0, 1)
 
-        [Toggle(_USE_GRADUAL_TEXTURE)]_USE_GRADUAL_TEXTURE("Enable", float) = 0
+        [Toggle(_USE_GRADUAL_TEXTURE)]_USE_GRADUAL_TEXTURE("Use Gradual Texture", float) = 0
         [NoScaleOffset]_LiquidGradualTexture("Liquid Gradual Texture", 2D) = "white" {}
         _GradualScale("Gradual Scale", float) = 1
         _GradualOffset("Gradual Offset", float) = 1
-        [HDR]_LiquidColor("Liquid Color", Color) = (0, 0, 0, 1)
+
+        [Space(20)]
+        [HDR]_LiquidColor("Liquid Color", Color) = (0, 2.1, 2.6, 1)
         [HDR]_SurfaceColor("Liquid Surface Color", Color) = (0, 0, 0, 1)
+        _LiquidRoughness("Liquid Roughness", Range(0, 1)) = 0.18
         [HDR]_FoamColor("Foam Color", Color) = (0, 0.5, 0, 1)
-        _FoamHeight("Foam Height", float) = 0.1
-        _LiquidRoughness("Liquid Roughness", Range(0, 1)) = 0.9
+        _FoamHeight("Foam Height", Range(0, 0.1)) = 0.06
         
         [Header(Liquid Tension)]
         _LiquidTension("Liquid Tension", Range(0, 40)) = 30
@@ -24,8 +26,8 @@
         [Space(10)]
         [Header(Wave Controller)]
         _WaveTex ("Liquid Wave Texture", 2D) = "white" {}
-        _LiquidWaveIntensity("Liquid Wave Intensity", Range(0, 6)) = 3.9
-        _LiquidWaveDensity("Liquid Wave Density", Range(0, 1)) = 0.18
+        _LiquidWaveIntensity("Liquid Wave Intensity", Range(0, 6)) = 0.88
+        _LiquidWaveDensity("Liquid Wave Density", Range(0, 3)) = 0.1
         _WaveMoveSpeed("Wave Move Speed", Range(0, 5)) = 0.8
 
         [Space(10)] 
@@ -40,51 +42,69 @@
         [Header(Liquid Frensnel Effect)]
         [HDR]_LiquidFresnelColor("Liquid Fresnel Color", Color) = (0, 0, 0, 1)
         _LiquidFresnelValue("Liquid Fresnel Value", Range(0, 1)) = 0.02
-        _LiquidFresnelPow("Liquid Fresnel Power", Range(0, 20)) = 5
+        _LiquidFresnelPow("Liquid Fresnel Power", Range(0, 20)) = 20
 
         [Space(20)]
         [Header(Bottle Properties)]
         [HDR]_BottleColor("Bottle Color", Color) = (0, 0, 0, 1)
-        _BottleSize("Bottle Size", Range(0, 1)) = 0
+        _BottleSize("Bottle Size", Range(0, 0.02)) = 0.008
         _BottleRoughness("Bottle Roughness", Range(0, 1)) = 0.9
         _BottleMinAlpha("Bottle Min Alpha", Range(0, 1)) = 0.1
         _BottleAlpahRange("Bottle Alpah Range", Range(0, 1)) = 1
 
-        _BottleRimPower("Bottle Rim Power", Range(0, 9)) = 0
-        _SpecularPower("Specular Power", Range(0, 100)) = 20
+        _BottleRimPower("Bottle Rim Power", Range(0, 9)) = 3
+        _SpecularPower("Specular Power", Range(0, 100)) = 30
 
         [Space(10)] 
         [Header(Bottle Frensnel Effect)]
-        _BottleFresnelColor("Bottle Fresnel Color", Color) = (0, 0, 0, 1)
+        [HDR]_BottleFresnelColor("Bottle Fresnel Color", Color) = (0, 0, 0, 1)
         _BottleFresnelValue("Bottle Fresnel Value", Range(0, 1)) = 0.02
         _BottleFresnelPow("Bottle Fresnel Power", Range(0, 30)) = 5
 
         //----------------ParallaxMap--------------------------
 
+        [Space(40)] 
         [Toggle(_PARALLAX_MAP)]_parallax_map("using Parallax Map", float) = 0
-        _ParallaxTexture("Parallax Texture", 2D) = "black" {}
-        // _ParallaxScale("Parallax Scale", Range(0, 0.1)) = 0.05
+        _ParallaxScale("Parallax Scale", Range(0, 0.2)) = 0.05
+        [HideInInspector]_ParallaxTexture("Parallax Texture", 2D) = "black" {}
         
-        _BubbleTexture("Bubble Color Texture", 2D) = "black" {}
-        _BubbleTexture2("Bubble Color Texture 2", 2D) = "black" {}
-        // [NoScaleOffset]_BubbleNormalTexture("BubbleNormal Texture", 2D) = "white" {}
-        _BubbleInnerColor("Bubble Inner Color", Color) = (1, 1, 1, 1)
-        _BubbleOuterColor("Bubble Outer Color", Color) = (1, 1, 1, 1)
-        _MinValue("MinValue", Range(0, 1)) = 0.9
-        _MaxValue("MaxValue", Range(0, 1)) = 0.9
+        [NoScaleOffset]_BubbleTexture("Bubble Color Texture", 2D) = "black" {}
 
-		_LayerHeightBias("Layer Height Start Bias", Range(0.0, 1)) = 0.2
+        _Buble1SizeX("Bubble 1 Size Horizontal", Range(10, 0)) = 1
+        _Buble1SizeY("Bubble 1 Size Vertical", Range(10, 0)) = 1
+
+        // _Buble2SizeX("Bubble 2 Size Horizontal", Range(0, 10)) = 1
+        // _Buble2SizeY("Bubble 2 Size Vertical", Range(0, 10)) = 1
+        // _Buble2OffsetX("Bubble 2 Offset Horizontal", Range(0, 10)) = 0.2
+        // _Buble2OffsetY("Bubble 2 Offset Vertical", Range(0, 10)) = 0.7
+
+        [HDR]_BubbleInnerColor("Bubble Inner Color", Color) = (1, 1, 1, 1)
+        [HDR]_BubbleOuterColor("Bubble Outer Color", Color) = (0.2, 0.2, 0.2, 1)
+        [Space(10)]
+        _BackGroundNoise("BackGround Noise", 2D) = "white" {}
+        _NoiseSpeedX("Noise Move Speed X", Range(-40, 40)) = 1
+        _NoiseSpeedY("Noise Move Speed Y", Range(-40, 40)) = 1
+
+        [Space(20)]
+		_Layer1HeightBias("Layer Height Start Bias", Range(0.0, 3)) = 0.2
         [Toggle(EnableLayer1)] _EnableLayer1("Enable", float) = 0
         _Layer1SpeedX("_Layer1 Speed X", float) = 1
         _Layer1SpeedY("_Layer1 Speed Y", float) = 1
         
+		_Layer2HeightBias("Layer Height Start Bias", Range(0.0, 3)) = 0.2
         [Toggle(EnableLayer2)] _EnableLayer2("Enable", float) = 0
         _Layer2SpeedX("_Layer2 Speed X", float) = 1
         _Layer2SpeedY("_Layer2 Speed Y", float) = 1
 
+		_Layer3HeightBias("Layer Height Start Bias", Range(0.0, 3)) = 0.2
         [Toggle(EnableLayer3)] _EnableLayer3("Enable", float) = 0
         _Layer3SpeedX("_Layer3 Speed X", float) = 1
         _Layer3SpeedY("_Layer3 Speed Y", float) = 1
+
+        [Space(10)]
+        [Toggle(_ENABLE_COLORSTEP)]_Enable_ColorStep("Enable step bubble color", float) = 0
+        _MinValue("MinValue", Range(0, 1)) = 0.482
+        _MaxValue("MaxValue", Range(0, 1)) = 0.609
         //----------------ParallaxMap--------------------------
     }
 
@@ -108,7 +128,6 @@
     inline half FresnelTerm(half f0, half vDotn, half powValue)
     {
         return f0 + (1 - f0) * pow(1-vDotn, powValue);
-
         //another Fresnel function
         // return _LiquidThicknessValue + (1 - _LiquidThicknessValue)*pow(2, -5.55473*dot(V, H)-6.98316*dot(V, H));
     }
@@ -134,10 +153,11 @@
             #pragma shader_feature EnableLayer2
             #pragma shader_feature EnableLayer3
             #pragma shader_feature _PARALLAX_FUNCTION
+            #pragma shader_feature _ENABLE_COLORSTEP
 			// #define _PARALLAX_FUNCTION ParallaxRaymarching
             #include "EsShaders_ParallaxMap.cginc"
 #endif
-            // //----------------ParallaxMap--------------------------
+            //----------------ParallaxMap--------------------------
 
             #pragma shader_feature _USE_GRADUAL_TEXTURE
 
@@ -179,8 +199,6 @@
             half _LiquidFresnelPow;
 
             //-------------------_Parallax---------------------
-            sampler2D _BubbleNormalTexture;
-            half4 _BubbleNormalTexture_ST;
 
             struct a2v
             {
@@ -285,16 +303,17 @@
 
                     //--------------------Parallax-----------------------------
                     
-                    half2 viewDirToCenter = (_WorldZeroPos.xz - _WorldSpaceCameraPos.xz);
-                    half2 leftDir = normalize(half2(-viewDirToCenter.y, viewDirToCenter.x));
-                    half2 dirToCenterPos = _WorldZeroPos.xz - leftDir*2 - i.worldPos.xz;
-                    // return fixed4(i.worldPos.xz, 0, 1);
+                    half3 viewDirToCenter = (_WorldZeroPos.xyz - _WorldSpaceCameraPos.xyz);
+                    viewDirToCenter.y = 0;
+                    half3 leftDir = normalize(cross(normalize(viewDirToCenter), half3(0, 1, 0)));
+                    half2 dirToCenterPos = i.worldPos.xz - (_WorldZeroPos.xz - leftDir*4);
                     
                     half2 palneuv = half2(dot(leftDir,dirToCenterPos), i.worldPos.y);
-                    // return fixed4(palneuv, 0, 1);
+
 #ifdef _PARALLAX_MAP
-                    return fixed4(ApplyParallax(normalize(i.tangentViewDir), i.uv , 1).rgb*_BubbleOuterColor.a*liquidVal,1);
-                    finalColor.rgb += ApplyParallax(normalize(i.tangentViewDir), i.uv, 1).rgb*_BubbleOuterColor.a*liquidVal;
+                    fixed4 bubbleColor = ApplyParallax(normalize(i.tangentViewDir), i.uv, 1);
+                    finalColor.rgb = lerp(finalColor.rgb, bubbleColor.rgb, bubbleColor.a*_BubbleInnerColor.a*liquidVal);
+                    // return bubbleColor;
 #endif
                 }
                 return finalColor;

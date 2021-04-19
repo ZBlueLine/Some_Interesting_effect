@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_LiquidBottle
   m_Shader: {fileID: 4800000, guid: 17c0f6a4dc988df45981844e9bab6db2, type: 3}
-  m_ShaderKeywords: EnableLayer3 _PARALLAX_MAP _USE_GRADUAL_TEXTURE
+  m_ShaderKeywords: EnableLayer1 EnableLayer2 EnableLayer3 _PARALLAX_MAP _USE_GRADUAL_TEXTURE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -19,6 +19,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BackGroundNoise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BubbleColorTexture:
         m_Texture: {fileID: 2800000, guid: b475e5e89fffb4041b0f25e3f530a0d9, type: 3}
         m_Scale: {x: 2, y: 2}
@@ -27,6 +31,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BubbleTexture:
+        m_Texture: {fileID: 2800000, guid: bde7bbedbe3609f4787be5e41bf9961d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BubbleTexture2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 12, y: 2}
+        m_Offset: {x: -0.92, y: -10.56}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -76,9 +88,9 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxTexture:
-        m_Texture: {fileID: 2800000, guid: 4859bbe290ef4d24c9791aa2ce1762b5, type: 3}
-        m_Scale: {x: 10, y: 10}
-        m_Offset: {x: 0, y: -0.37}
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _WaveTex:
         m_Texture: {fileID: 2800000, guid: 1d090353d12f3fc49a05b648eb64e01b, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -97,6 +109,8 @@ Material:
     - _BottleRoughness: 0.256
     - _BottleSize: 0
     - _BubbleBrightness: 0.314
+    - _Buble1SizeX: 1
+    - _Buble1SizeY: 1
     - _BumpScale: 1
     - _CenterLiquidThickness: 3
     - _CenterWaterThickness: 5.7
@@ -108,11 +122,13 @@ Material:
     - _EdgeLiquidThickness: 0.4
     - _EdgeWaterThickness: 0.3
     - _EdgeWidth: 0.08
-    - _EnableLayer1: 0
-    - _EnableLayer2: 0
+    - _EnableLayer1: 1
+    - _EnableLayer2: 1
     - _EnableLayer3: 1
-    - _FillAmount: 2.08
-    - _FoamHeight: 0.76
+    - _Enable_ColorStep: 0
+    - _Enable_Interpolate: 1
+    - _FillAmount: 2.1
+    - _FoamHeight: 0.1
     - _FoamWidth: 0.1
     - _FresnelGlass0: 0.16
     - _FresnelPow: 0.9
@@ -126,13 +142,18 @@ Material:
     - _GradualOffset: -0.44
     - _GradualScale: 0.16
     - _Height: 0.5
-    - _Layer1SpeedX: 0
-    - _Layer1SpeedY: -1
-    - _Layer2SpeedX: 0
-    - _Layer2SpeedY: -1
+    - _Layer1HeightBias: 1
+    - _Layer1SpeedX: 13
+    - _Layer1SpeedY: 9
+    - _Layer2HeightBias: 2.17
+    - _Layer2SpeedX: -6
+    - _Layer2SpeedY: 13.33
+    - _Layer3HeightBias: 1.39
     - _Layer3SpeedX: 0
-    - _Layer3SpeedY: -1
-    - _LayerHeightBias: 0.2
+    - _Layer3SpeedY: 17.6
+    - _LayerAlpha: 1
+    - _LayerHeightBias: 0.509
+    - _LayerPowerDelta: 0.1
     - _LightBackWide: 0.795
     - _LiquidEdgeDrop: 0.015
     - _LiquidFresnelPow: 20
@@ -145,17 +166,21 @@ Material:
     - _LiquidRoughness: 0.177
     - _LiquidTension: 11.5
     - _LiquidThicknessValue: 0
-    - _LiquidWaveDensity: 0.336
-    - _LiquidWaveIntensity: 0.88
+    - _LiquidWaveDensity: 0.075
+    - _LiquidWaveIntensity: 1.48
+    - _MaxValue: 0.5
     - _Metallic: 0
+    - _MinValue: 0.3
     - _Mode: 0
     - _NoiseDensity: 0.218
     - _NoiseFrequence: 0.171
     - _NoiseScale: 4.28
     - _NoiseSpeed: 0.39
+    - _NoiseSpeedX: 1
+    - _NoiseSpeedY: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ParallaxScale: 0.1
+    - _ParallaxScale: 0.785
     - _Raduis: 0.1
     - _RefrScale: 0.88
     - _Refractive: -1
@@ -170,6 +195,7 @@ Material:
     - _SpecularHighlights: 1
     - _SpecularPower: 34.8
     - _SrcBlend: 1
+    - _TotalLayers: 5
     - _USE_GRADUAL_TEXTURE: 1
     - _UVSec: 0
     - _WaterRoughness: 0.128
@@ -186,6 +212,8 @@ Material:
     - _BottleColor: {r: 1, g: 0.8196079, b: 0.54901963, a: 0}
     - _BottleFresnelColor: {r: 1, g: 0.8537037, b: 0.6273585, a: 1}
     - _BubbleColor: {r: 1, g: 1, b: 1, a: 0.2627451}
+    - _BubbleInnerColor: {r: 0, g: 0.8745099, b: 1, a: 1}
+    - _BubbleOuterColor: {r: 0.7607844, g: 1, b: 0.9843138, a: 1}
     - _CameraOffset: {r: 0.2, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorBack: {r: 0.7169812, g: 0.064257726, b: 0.064257726, a: 1}
@@ -196,7 +224,7 @@ Material:
     - _ForceDir: {r: 0, g: 0, b: 0, a: 0}
     - _FresnelColor: {r: 0.27058825, g: 0.85098046, b: 0.043137256, a: 1}
     - _LiquidCameraOffset: {r: 0.2, g: 0, b: 0, a: 0}
-    - _LiquidColor: {r: 2.6561813, g: 2.6561813, b: 2.6561813, a: 1}
+    - _LiquidColor: {r: 0, g: 2.1021388, b: 2.6429305, a: 1}
     - _LiquidFresnelColor: {r: 1, g: 1, b: 1, a: 1}
     - _LiquidRimColor: {r: 1, g: 1, b: 1, a: 1}
     - _ModleCenterPos: {r: 0, g: 0, b: 0, a: 0}
