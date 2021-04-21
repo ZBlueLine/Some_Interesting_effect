@@ -4,6 +4,7 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         _NormalTex("Normal Map", 2D) = "bump" {}
+        [Toggle(_USE_METALLICTEX)]UseMetallictex("use Metallic Texture", float) = 0
         _MetallicTex("Metallic Texture", 2D) = "black" {}
 
         _Distance("Light distance", float) = 0
@@ -22,6 +23,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fwdbase
+            #pragma shader_feature _USE_METALLICTEX
 
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
@@ -40,10 +42,9 @@
                 float2 uv : TEXCOORD0;
                 float3 normal : NORMAL;
                 float4 pos : SV_POSITION;
-                float3 worldPos : TEXCOORD1;
-                float3 TBN0 :TEXCOORD2;
-                float3 TBN1 :TEXCOORD3;
-                float3 TBN2 :TEXCOORD4;
+                float4 TBN0 :TEXCOORD2;
+                float4 TBN1 :TEXCOORD3;
+                float4 TBN2 :TEXCOORD4;
                 SHADOW_COORDS(5)
             };
 
@@ -101,14 +102,15 @@
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.normal = normalize(mul(v.normal, (float3x3)unity_WorldToObject));
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
+                float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
                 float3 tangent = normalize(mul(v.tangent, (float3x3)unity_WorldToObject));
-                float3 binormal = cross(tangent, o.normal)*v.tangent.w;
-                o.TBN0 = float3(tangent.x, binormal.x, o.normal.x);
-                o.TBN1 = float3(tangent.y, binormal.y, o.normal.y);
-                o.TBN2 = float3(tangent.z, binormal.z, o.normal.z);
+                float3 normal = normalize(mul(v.normal, (float3x3)unity_WorldToObject));
+                float3 binormal = cross(tangent, normal)*v.tangent.w;
+
+                o.TBN0 = float4(tangent.x, binormal.x, normal.x, worldPos.x);
+                o.TBN1 = float4(tangent.y, binormal.y, normal.y, worldPos.y);
+                o.TBN2 = float4(tangent.z, binormal.z, normal.z, worldPos.z);
 
                 TRANSFER_SHADOW(o);
                 return o;
@@ -116,14 +118,18 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
+                #ifdef _USE_METALLICTEX
                 _Metallic = tex2D(_MetallicTex, i.uv).a;
-                float3x3 tbn = float3x3(i.TBN0, i.TBN1, i.TBN2);
+                #endif
+
+                float3x3 tbn = float3x3(i.TBN0.xyz, i.TBN1.xyz, i.TBN2.xyz);
                 float3 normal = UnpackNormal(tex2D(_NormalTex, i.uv));
-                // return fixed4(normal, 1);
+
                 normal = normalize(mul(tbn, normal));
 
+                float3 worldPos = float3(i.TBN0.w, i.TBN1.w, i.TBN2.w);
                 float3 N = normal;
-                float3 V = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
+                float3 V = normalize(_WorldSpaceCameraPos.xyz - worldPos);
                 float3 L = normalize(_WorldSpaceLightPos0.xyz);
                 float3 H = normalize(V + L);
                 // float distance = length(_WorldSpaceLightPos0.xyz - i.worldPos);
@@ -132,8 +138,6 @@
 
                 float attenuation = 1.0/(_Distance*_Distance);
                 float cosTheta = max(dot(H, N), 0.0);
-
-
 
                 float NDF = DistributionGGX(N, H, _Roughness);
                 float G   = GeometrySmith(N, V, L, _Roughness);

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PBR 1
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Name: Fade
+  m_Shader: {fileID: 4800000, guid: d3c20937a4b15804caac4dea441c8a00, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 450f1e4bf1d48a2458281e94fa04a0b7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -55,26 +55,48 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
+    - _ColorInvert: 0
+    - _ColorPower: 6.318185
+    - _ColorScale: 1.430902
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _Distance: 0.38
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.511
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Metallic: 1
+    - _L1Offset: 0.8991984
+    - _L2Offset: 0.8991984
+    - _L3Offset: 0.8991984
+    - _Metallic: 0
     - _Mode: 0
+    - _Noise1Multiply: 3
+    - _Noise1Scale: 79.01261
+    - _Noise2Multiply: 3
+    - _Noise2Scale: 79.01261
+    - _Noise2TilingUV: 0.032
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Roughness: 0.864
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _Speed1: 0
+    - _Speed2: 0
     - _SrcBlend: 1
+    - _TranProgress: 0.57
     - _UVSec: 0
+    - _VertexY: 3
     - _ZWrite: 1
+    - __dirty: 1
     m_Colors:
-    - _Color: {r: 0.7176471, g: 0.7176471, b: 0.7176471, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TintColor: {r: 1, g: 0, b: 0, a: 0}
+    - _InColor: {r: 0.8235294, g: 0.8235294, b: 0.8235294, a: 0}
+    - _L1Color: {r: 1, g: 1, b: 1, a: 0}
+    - _L2Color: {r: 0.6037736, g: 0.04768888, b: 0, a: 0}
+    - _L3Color: {r: 11.68357, g: 12, b: 6.264707, a: 0}
+    - _OutColor: {r: 1, g: 1, b: 1, a: 0}
