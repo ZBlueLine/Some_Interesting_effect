@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Fur
   m_Shader: {fileID: 4800000, guid: 5501e33951f95fe4ba95944d54630821, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: ENABLE_SECOND_NOISE_TEX
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -49,7 +49,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
         m_Texture: {fileID: 2800000, guid: ef4546d3e423d034f82caa6cdd800854, type: 3}
-        m_Scale: {x: 10, y: 10}
+        m_Scale: {x: 15, y: 15}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
@@ -61,7 +61,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _SecondNoiseTex:
         m_Texture: {fileID: 2800000, guid: ef4546d3e423d034f82caa6cdd800854, type: 3}
-        m_Scale: {x: 3, y: 3}
+        m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BlendScale: 0.772
@@ -69,16 +69,19 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnelPow: 1.34
-    - _FresnelScale: 1
-    - _FurLength: 0.125
-    - _FurRadius: 14.3
+    - _FresnalBias: 0
+    - _FresnalPower: 0.06
+    - _FresnalScale: 2.76
+    - _FresnelPow: 0.99
+    - _FresnelScale: 0.027
+    - _FurLength: 0.105
+    - _FurRadius: 15.9
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _OcclusionPower: 3.49
+    - _OcclusionPower: 1.13
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
@@ -86,11 +89,11 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
-    - enable_second_noise_tex: 0
+    - enable_second_noise_tex: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FurColor: {r: 1, g: 1, b: 1, a: 1}
-    - _OcclusionColor: {r: 0.6509434, g: 0.6509434, b: 0.6509434, a: 1}
-    - _UVOffset: {r: 0, g: 100, b: -19.8, a: 68.2}
+    - _OcclusionColor: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 1}
+    - _UVOffset: {r: -67.6, g: 132.1, b: -67.6, a: 132.1}
     - _UvOffset: {r: 0, g: 80, b: 7.8, a: 80}
