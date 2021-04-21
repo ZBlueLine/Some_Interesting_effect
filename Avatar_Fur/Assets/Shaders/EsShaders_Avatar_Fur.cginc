@@ -1,4 +1,4 @@
-﻿
+﻿#include "Lighting.cginc"
 sampler2D _MainTex;
 half4 _MainTex_ST;
 
@@ -11,6 +11,7 @@ half4 _SecondNoiseTex_ST;
 fixed4 _FurColor;
 half _FurLength;
 half _FurRadius;
+half _FurDirLightExposure;
 
 fixed4 _OcclusionColor;
 half _OcclusionPower;
@@ -19,6 +20,8 @@ half4 _UVOffset;
 half _FresnalBias;
 half _FresnalPower;
 half _FresnalScale;
+
+half _LightFilter;
 
 struct appdata
 {
@@ -51,8 +54,9 @@ v2f vert_fur (appdata v)
     half3 worldPos = mul(unity_ObjectToWorld, v.vertex);
     half3 viewDir = normalize(_WorldSpaceCameraPos.xyz - worldPos);
     half3 normal = normalize(mul(UNITY_MATRIX_MV, float4(v.normal,0)).xyz);
-    half sh = saturate(normal.y *0.25+0.45);
+    half3 worldLightDir = normalize(WorldSpaceLightDir(v.vertex));
 
+    half sh = saturate(normal.y *0.25+0.55);
     half occlusion = saturate(pow(FURSTEP,_OcclusionPower));
     occlusion +=0.04 ;
     
@@ -60,14 +64,20 @@ v2f vert_fur (appdata v)
     half3 shlight = lerp (_OcclusionColor*sh,sh, occlusion) ;
     half fresnal = saturate(min(1, _FresnalBias + _FresnalScale*pow(1-dot(viewDir,worldNormal),_FresnalPower)));
     half rimLight =fresnal * occlusion; //AO
+
     rimLight *= sh;//成环境因子
-    shlight += rimLight;
+    shlight = lerp(shlight, fixed3(1, 1, 1), rimLight);
 
     o.lightMul = shlight;
 
     fixed3 atten = UNITY_LIGHTMODEL_AMBIENT.xyz;
     //环境光
     o.lightAdd.rgb = atten;
+
+    half3 diff = max(0, dot(worldNormal, worldLightDir));
+    diff = saturate(diff + _LightFilter + FURSTEP);
+    diff *= _FurDirLightExposure*_LightColor0.rgb;
+    o.lightMul.rgb *= diff;
 
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     o.noise_uv.xy = TRANSFORM_TEX(v.uv, _NoiseTex);

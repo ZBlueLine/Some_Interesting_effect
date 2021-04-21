@@ -69,19 +69,21 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnalBias: 0
-    - _FresnalPower: 0.06
-    - _FresnalScale: 2.76
+    - _FresnalBias: 0.46
+    - _FresnalPower: 2.69
+    - _FresnalScale: 2.83
     - _FresnelPow: 0.99
     - _FresnelScale: 0.027
+    - _FurDirLightExposure: 2
     - _FurLength: 0.105
     - _FurRadius: 15.9
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _LightFilter: -0.5
     - _Metallic: 0
     - _Mode: 0
-    - _OcclusionPower: 1.13
+    - _OcclusionPower: 3.26
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0

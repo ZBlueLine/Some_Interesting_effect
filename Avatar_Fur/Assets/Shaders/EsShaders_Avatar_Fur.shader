@@ -12,12 +12,15 @@
         _FurLength("Furry Length", Range(0, 1)) = 1
         _FurRadius("Fur Radius", Range(20, 0)) = 1
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
-        _OcclusionPower("_OcclusionPower", Range(0, 4)) = 2
+        _OcclusionPower("_OcclusionPower", Range(0, 10)) = 2
         _UVOffset("Uv Offset", Vector) = (0, 0, 0, 0)
 
-        _FresnalBias("Fresnal Bias", Range(0.0, 0.5)) = 0.1
+        _FresnalBias("Fresnal Bias", Range(0.0, 2)) = 0.1
         _FresnalPower("Fresnel Power", Range(0, 10)) = 5
         _FresnalScale("Fresnel Scale", Range(0, 10)) = 0.1
+
+        _FurDirLightExposure("Furry DirLight Exposure", Range(0, 2)) = 1
+        _LightFilter("Light Filter", Range(-0.5, 0.5)) = 0
     }
     SubShader
     {
