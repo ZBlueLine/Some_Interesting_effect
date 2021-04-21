@@ -14,8 +14,10 @@
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
         _OcclusionPower("_OcclusionPower", Range(0, 4)) = 2
         _UVOffset("Uv Offset", Vector) = (0, 0, 0, 0)
-        _FresnelPow("Fresnel Power", Range(0, 10)) = 5
-        _FresnelScale("Fresnel Scale", Range(0, 1)) = 0.1
+
+        _FresnalBias("Fresnal Bias", Range(0.0, 0.5)) = 0.1
+        _FresnalPower("Fresnel Power", Range(0, 10)) = 5
+        _FresnalScale("Fresnel Scale", Range(0, 10)) = 0.1
     }
     SubShader
     {
@@ -472,7 +474,7 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.99
+            #define FURSTEP 1
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"

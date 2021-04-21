@@ -9,13 +9,15 @@
         _SecondNoiseTex("Second Noise Texture", 2D) = "black" {}
 
         _FurColor("Fur Color", Color) = (0, 0, 0, 1)
-        _FurLength("Furry Length", Range(0, 1)) = 1
-        _FurRadius("Fur Radius", Range(15, 0)) = 1
+        _FurLength("Furry Length", Range(0, 0.05)) = 1
+        _FurRadius("Fur Radius", Range(100, 0)) = 1
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
-        _OcclusionPower("_OcclusionPower", Range(0, 10)) = 2
+        _OcclusionPower("_OcclusionPower", Range(0, 1)) = 2
         _UVOffset("UV Offset", Vector) = (0, 0, 0, 0)
-        _FresnelPow("Fresnel Power", Range(0, 10)) = 5
-        _FresnelScale("Fresnel Scale", Range(0, 1)) = 0.1
+
+        _FresnalBias("Fresnal Bias", float) = 0.1
+        _FresnalPower("Fresnel Power", Range(0, 10)) = 5
+        _FresnalScale("Fresnel Scale", Range(0, 1)) = 0.1
     }
     SubShader
     {
@@ -171,7 +173,7 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.99
+            #define FURSTEP 1.0
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
