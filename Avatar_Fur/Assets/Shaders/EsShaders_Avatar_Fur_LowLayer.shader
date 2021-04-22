@@ -9,15 +9,24 @@
         _SecondNoiseTex("Second Noise Texture", 2D) = "black" {}
 
         _FurColor("Fur Color", Color) = (0, 0, 0, 1)
-        _FurLength("Furry Length", Range(0, 0.05)) = 1
-        _FurRadius("Fur Radius", Range(100, 0)) = 1
+        _FurLength("Furry Length", Range(0, 1)) = 1
+        _FurRadius("Fur Radius", Range(100,20)) = 1
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
-        _OcclusionPower("_OcclusionPower", Range(0, 1)) = 2
-        _UVOffset("UV Offset", Vector) = (0, 0, 0, 0)
+        _OcclusionPower("_OcclusionPower", Range(0, 10)) = 2
+        _UVOffset("Uv Offset", Vector) = (0, 0, 0, 0)
 
-        _FresnalBias("Fresnal Bias", float) = 0.1
+        _FresnalColor("Fresnal Color", Color) = (1, 1, 1, 1)
+        _FresnalBias("Fresnal Bias", Range(0.0, 2)) = 0.1
         _FresnalPower("Fresnel Power", Range(0, 10)) = 5
-        _FresnalScale("Fresnel Scale", Range(0, 1)) = 0.1
+        _FresnalScale("Fresnel Scale", Range(0, 10)) = 0.1
+
+        _FurDirLightExposure("Furry DirLight Exposure", Range(0, 10)) = 1
+        _LightFilter("Light Filter", Range(-1, 1)) = 0
+        // _TangentOffsetTex("Tangent Offset Texture", 2D) = "balck" {}
+        _SpecColor1("_SpecColor1",color) = (0,0,0,1)
+        _SpecColor2("_SpecColor1",color) = (0,0,0,1)
+        _SpecInfo("SpecInfo" , vector) = (1,0,1,0)
+        _AnisotropicScale("_AnisotropicPowerScale", Range(0, 1)) = 0.5
     }
     SubShader
     {

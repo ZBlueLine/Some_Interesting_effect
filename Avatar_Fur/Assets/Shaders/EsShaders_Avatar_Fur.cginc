@@ -5,6 +5,8 @@ half4 _MainTex_ST;
 sampler2D _NoiseTex;
 half4 _NoiseTex_ST;
 
+// sampler2D _TangentOffsetTex;
+
 sampler2D _SecondNoiseTex;
 half4 _SecondNoiseTex_ST;
 
@@ -17,17 +19,24 @@ fixed4 _OcclusionColor;
 half _OcclusionPower;
 half4 _UVOffset;
 
+fixed4 _FresnalColor;
 half _FresnalBias;
 half _FresnalPower;
 half _FresnalScale;
 
 half _LightFilter;
 
+fixed4 _SpecColor1;
+fixed4 _SpecColor2;
+half4 _SpecInfo;
+half _AnisotropicScale;
+
 struct appdata
 {
     half4 vertex : POSITION;
     half3 normal : NORMAL;
     half2 uv : TEXCOORD0;
+    half4 tangent : TANGENT;
 };
 struct v2f
 {
@@ -35,8 +44,23 @@ struct v2f
     half2 uv : TEXCOORD0;
     half4 noise_uv : TEXCOORD1;
     half3 lightMul : TEXCOORD2;
-    half3 lightAdd : TEXCOORD3;
+    half4 lightAdd : TEXCOORD3;
 };
+
+half StrandSpecular(half3 tangent, half3 worldViewDir, half3 lightDir, half exponent)
+{
+    half3 halfDir = normalize(lightDir + worldViewDir);
+    float hDott = dot(halfDir, tangent);
+    float sinTH = sqrt(1-hDott*hDott);
+    float cosTH = cos(hDott);
+    float dirAtten = smoothstep(-1,0,hDott);
+    float specular = dirAtten*pow(cosTH, exponent);
+    return specular;
+}
+float3 ShiftTangent(float3 tangent, float3 normal, float shift)
+{
+    return tangent + normal*shift;
+}
 
 v2f vert_fur (appdata v)
 {
@@ -46,39 +70,46 @@ v2f vert_fur (appdata v)
     v2f o;
     // half furStep = sqrt(FURSTEP * _FurLength*0.1);
     half furStep = FURSTEP * _FurLength;
-
     v.vertex.xyz += normalize(v.normal) * furStep;
     o.vertex = UnityObjectToClipPos(v.vertex);
-
-    half3 worldNormal = UnityObjectToWorldNormal(v.normal);
+    half3 worldNormal = UnityObjectToWorldNormal(v.normal); 
     half3 worldPos = mul(unity_ObjectToWorld, v.vertex);
-    half3 viewDir = normalize(_WorldSpaceCameraPos.xyz - worldPos);
+    half3 worldViewDir = normalize(_WorldSpaceCameraPos.xyz - worldPos);
     half3 normal = normalize(mul(UNITY_MATRIX_MV, float4(v.normal,0)).xyz);
     half3 worldLightDir = normalize(WorldSpaceLightDir(v.vertex));
+    half3 worldTangent = normalize(mul(unity_ObjectToWorld,v.tangent.xyz).xyz);
+    half3 worldBitangent = normalize(cross(worldTangent, worldNormal));
 
-    half sh = saturate(normal.y *0.25+0.55);
-    half occlusion = saturate(pow(FURSTEP,_OcclusionPower));
-    occlusion +=0.04 ;
     
-    //计算AO
-    half3 shlight = lerp (_OcclusionColor*sh,sh, occlusion) ;
-    half fresnal = saturate(min(1, _FresnalBias + _FresnalScale*pow(1-dot(viewDir,worldNormal),_FresnalPower)));
-    half rimLight =fresnal * occlusion; //AO
+    // fixed3 atten = UNITY_LIGHTMODEL_AMBIENT.xyz;
+    // half sh = saturate(normal.y *0.25+0.35);
+    
+    //AO
+    half occlusion = saturate(pow(FURSTEP,_OcclusionPower));
+    occlusion +=0.04;
+    half3 aoColor = lerp (_OcclusionColor,1, occlusion) ;
+    //fresnal
+    half fresnal = saturate(min(1, _FresnalBias + _FresnalScale*pow(1-dot(worldViewDir,worldNormal),_FresnalPower)));
+    fresnal =fresnal * occlusion; 
 
-    rimLight *= sh;//成环境因子
-    shlight = lerp(shlight, fixed3(1, 1, 1), rimLight);
+    o.lightMul = aoColor;
+    o.lightAdd.a = fresnal;
 
-    o.lightMul = shlight;
-
-    fixed3 atten = UNITY_LIGHTMODEL_AMBIENT.xyz;
-    //环境光
-    o.lightAdd.rgb = atten;
-
+    //Dir Light
     half3 diff = max(0, dot(worldNormal, worldLightDir));
     diff = saturate(diff + _LightFilter + FURSTEP);
     diff *= _FurDirLightExposure*_LightColor0.rgb;
     o.lightMul.rgb *= diff;
 
+    //Anisotropic Specular
+    float3 shiftTangent1 = ShiftTangent(worldBitangent,worldNormal,_SpecInfo.y*0.1);
+    float3 shiftTangent2 = ShiftTangent(worldBitangent,worldNormal,_SpecInfo.w*0.1);
+
+    float anisoSpec1 = StrandSpecular(shiftTangent1,worldViewDir,worldLightDir,_SpecInfo.x*16) * _AnisotropicScale * FURSTEP* 2;
+    float anisoSpec2 = StrandSpecular(shiftTangent2,worldViewDir,worldLightDir,_SpecInfo.z*16) * _AnisotropicScale * FURSTEP* 2;
+    o.lightAdd.rgb = _SpecColor1.rgb*anisoSpec1+_SpecColor2.rgb*anisoSpec2;
+
+    //Fur Noise
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     o.noise_uv.xy = TRANSFORM_TEX(v.uv, _NoiseTex);
     o.noise_uv.zw = TRANSFORM_TEX(v.uv, _SecondNoiseTex);
@@ -92,13 +123,14 @@ v2f vert_fur (appdata v)
 }
 fixed4 frag_fur (v2f i) : SV_Target
 {
-
-    half furStep = FURSTEP * _FurLength;
+    // return i.lightAdd.a;
+    half furStep = FURSTEP * _FurLength*0.01;
     fixed3 col = _FurColor.rgb;
     fixed3 noiseTex = tex2D(_NoiseTex, i.noise_uv.xy);
     fixed noiseAlpha =  noiseTex.r;
     //拟合毛发形状
     fixed furAlpha = saturate(noiseAlpha*2-(furStep * furStep + (furStep * _FurRadius)));
+
 #ifdef ENABLE_SECOND_NOISE_TEX
     noiseTex = tex2D(_SecondNoiseTex, i.noise_uv.zw);
     noiseAlpha =  noiseTex.r;
@@ -108,7 +140,9 @@ fixed4 frag_fur (v2f i) : SV_Target
     
     if(furStep - 0.0 < 1e-3)
         furAlpha = 1;
-    col.rgb *= i.lightMul;
+    col.rgb = col*i.lightMul;
+    col.rgb += i.lightAdd.a * _FresnalColor + i.lightAdd.rgb*furAlpha*2;
     // col.rgb = i.sh;
+    // return furAlpha*2;
     return fixed4(col.rgb, furAlpha);
 }
