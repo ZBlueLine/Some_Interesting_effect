@@ -17,7 +17,9 @@ half _FurDirLightExposure;
 
 fixed4 _OcclusionColor;
 half _OcclusionPower;
+half _OcclusionRange;
 half4 _UVOffset;
+half _UVOffsetAtten;
 
 fixed4 _FresnalColor;
 half _FresnalBias;
@@ -85,7 +87,7 @@ v2f vert_fur (appdata v)
     // half sh = saturate(normal.y *0.25+0.35);
     
     //AO
-    half occlusion = saturate(pow(FURSTEP,_OcclusionPower));
+    half occlusion = saturate(pow(FURSTEP*_OcclusionRange,_OcclusionPower));
     occlusion +=0.04;
     half3 aoColor = lerp (_OcclusionColor,1, occlusion) ;
     //fresnal
@@ -124,7 +126,7 @@ v2f vert_fur (appdata v)
 fixed4 frag_fur (v2f i) : SV_Target
 {
     // return i.lightAdd.a;
-    half furStep = FURSTEP * _FurLength*0.01;
+    half furStep = FURSTEP * _FurLength;
     fixed3 col = _FurColor.rgb;
     fixed3 noiseTex = tex2D(_NoiseTex, i.noise_uv.xy);
     fixed noiseAlpha =  noiseTex.r;

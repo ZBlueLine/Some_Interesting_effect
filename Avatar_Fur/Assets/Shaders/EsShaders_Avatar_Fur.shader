@@ -12,6 +12,7 @@
         _FurLength("Furry Length", Range(0, 1)) = 1
         _FurRadius("Fur Radius", Range(20, 0)) = 1
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
+        _OcclusionRange("_OcclusionRange", Range(0, 3)) = 1
         _OcclusionPower("_OcclusionPower", Range(0, 10)) = 2
         _UVOffset("Uv Offset", Vector) = (0, 0, 0, 0)
 
