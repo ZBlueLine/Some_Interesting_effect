@@ -1,4 +1,4 @@
-﻿Shader "EsShaders/Avatar LowLayer Fur"
+﻿Shader "EsShaders/Avatar Fur"
 {
     Properties
     {
@@ -9,25 +9,33 @@
         _SecondNoiseTex("Second Noise Texture", 2D) = "black" {}
 
         _FurColor("Fur Color", Color) = (0, 0, 0, 1)
-        _FurLength("Furry Length", Range(0, 0.2)) = 1
-        _FurRadius("Fur Radius", Range(100,20)) = 1
+        _FurLength("Furry Length", Range(0, 1)) = 1
+        _FurRadius("Fur Radius", Range(20, 0)) = 1
         _OcclusionColor("Occlusion Color", Color) = (0, 0, 0, 1)
-        _OcclusionRange("_OcclusionRange", Range(0, 3)) = 1
-        _OcclusionPower("_OcclusionPower", Range(0, 3)) = 2
-        _UVOffset("Uv Offset", Vector) = (0, 0, 0, 0)
+        _OcclusionRange("Occlusion Range", Range(0, 3)) = 1
+        _OcclusionPower("Occlusion mPower", Range(0, 10)) = 2
+        _UVOffset("UV Offset", Vector) = (0, 0, 0, 0)
 
         _FresnalColor("Fresnal Color", Color) = (1, 1, 1, 1)
-        _FresnalBias("Fresnal Bias", Range(0.0, 2)) = 0.1
+        _FresnalBias("Fresnal Bias", Range(0.0, 0.1)) = 0.1
         _FresnalPower("Fresnel Power", Range(0, 10)) = 5
         _FresnalScale("Fresnel Scale", Range(0, 10)) = 0.1
 
         _FurDirLightExposure("Furry DirLight Exposure", Range(0, 10)) = 1
         _LightFilter("Light Filter", Range(-1, 1)) = 0
         // _TangentOffsetTex("Tangent Offset Texture", 2D) = "balck" {}
+        [Space(20)]
+        [Header(Specular Properties)]
         _SpecColor1("_SpecColor1",color) = (0,0,0,1)
         _SpecColor2("_SpecColor1",color) = (0,0,0,1)
-        _SpecInfo("SpecInfo" , vector) = (1,0,1,0)
+
+        _Spec1Power("Spec1 Power" , Range(0, 80)) = 10
+        _Spec1Offset("Spec1 Offset", Range(0, 10)) = 0
+        _Spec2Power("Spec1 Power" , Range(0, 80)) = 2
+        _Spec2Offset("Spec1 Offset", Range(0, 10)) = 2
+
         _AnisotropicScale("_AnisotropicPowerScale", Range(0, 1)) = 0.5
+        
     }
     SubShader
     {
@@ -56,7 +64,7 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.05
+            #define FURSTEP 0.03
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
@@ -70,7 +78,35 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.1
+            #define FURSTEP 0.06
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.09
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.12
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
@@ -98,7 +134,7 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.2
+            #define FURSTEP 0.18
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
@@ -112,7 +148,36 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.25
+            #define FURSTEP 0.21
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.24
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+
+        
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.27
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
@@ -132,7 +197,7 @@
             #include "EsShaders_Avatar_Fur.cginc"
             ENDCG
         }
-        
+
         Pass
         {
             CGPROGRAM
@@ -140,7 +205,7 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.35
+            #define FURSTEP 0.33
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
@@ -154,14 +219,38 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.4
+            #define FURSTEP 0.36
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"
             ENDCG
         }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.39
 
-        
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.42
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
         Pass
         {
             CGPROGRAM
@@ -175,7 +264,6 @@
             #include "EsShaders_Avatar_Fur.cginc"
             ENDCG
         }
-        
         Pass
         {
             CGPROGRAM
@@ -183,7 +271,59 @@
             #pragma fragment frag_fur
             // make fog work
             #pragma shader_feature ENABLE_SECOND_NOISE_TEX
-            #define FURSTEP 0.5
+            #define FURSTEP 0.48
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.51
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.54
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.57
+
+            #include "UnityCG.cginc"
+            #include "EsShaders_Avatar_Fur.cginc"
+            ENDCG
+        }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_fur
+            #pragma fragment frag_fur
+            // make fog work
+            #pragma shader_feature ENABLE_SECOND_NOISE_TEX
+            #define FURSTEP 0.6
 
             #include "UnityCG.cginc"
             #include "EsShaders_Avatar_Fur.cginc"

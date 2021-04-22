@@ -30,7 +30,12 @@ half _LightFilter;
 
 fixed4 _SpecColor1;
 fixed4 _SpecColor2;
-half4 _SpecInfo;
+
+half _Spec1Power;
+half _Spec1Offset;
+half _Spec2Power;
+half _Spec2Offset;
+
 half _AnisotropicScale;
 
 struct appdata
@@ -70,7 +75,6 @@ v2f vert_fur (appdata v)
         #define FURSTEP 0
     #endif
     v2f o;
-    // half furStep = sqrt(FURSTEP * _FurLength*0.1);
     half furStep = FURSTEP * _FurLength;
     v.vertex.xyz += normalize(v.normal) * furStep;
     o.vertex = UnityObjectToClipPos(v.vertex);
@@ -82,9 +86,6 @@ v2f vert_fur (appdata v)
     half3 worldTangent = normalize(mul(unity_ObjectToWorld,v.tangent.xyz).xyz);
     half3 worldBitangent = normalize(cross(worldTangent, worldNormal));
 
-    
-    // fixed3 atten = UNITY_LIGHTMODEL_AMBIENT.xyz;
-    // half sh = saturate(normal.y *0.25+0.35);
     
     //AO
     half occlusion = saturate(pow(FURSTEP*_OcclusionRange,_OcclusionPower));
@@ -104,11 +105,11 @@ v2f vert_fur (appdata v)
     o.lightMul.rgb *= diff;
 
     //Anisotropic Specular
-    float3 shiftTangent1 = ShiftTangent(worldBitangent,worldNormal,_SpecInfo.y*0.1);
-    float3 shiftTangent2 = ShiftTangent(worldBitangent,worldNormal,_SpecInfo.w*0.1);
+    float3 shiftTangent1 = ShiftTangent(worldBitangent,worldNormal,_Spec1Offset*0.1);
+    float3 shiftTangent2 = ShiftTangent(worldBitangent,worldNormal,_Spec2Offset*0.1);
 
-    float anisoSpec1 = StrandSpecular(shiftTangent1,worldViewDir,worldLightDir,_SpecInfo.x*16) * _AnisotropicScale * FURSTEP* 2;
-    float anisoSpec2 = StrandSpecular(shiftTangent2,worldViewDir,worldLightDir,_SpecInfo.z*16) * _AnisotropicScale * FURSTEP* 2;
+    float anisoSpec1 = StrandSpecular(shiftTangent1,worldViewDir,worldLightDir,_Spec1Power*16) * _AnisotropicScale * FURSTEP* 2;
+    float anisoSpec2 = StrandSpecular(shiftTangent2,worldViewDir,worldLightDir,_Spec2Power*16) * _AnisotropicScale * FURSTEP* 2;
     o.lightAdd.rgb = _SpecColor1.rgb*anisoSpec1+_SpecColor2.rgb*anisoSpec2;
 
     //Fur Noise
@@ -144,7 +145,6 @@ fixed4 frag_fur (v2f i) : SV_Target
         furAlpha = 1;
     col.rgb = col*i.lightMul;
     col.rgb += i.lightAdd.a * _FresnalColor + i.lightAdd.rgb*furAlpha*2;
-    // col.rgb = i.sh;
-    // return furAlpha*2;
+
     return fixed4(col.rgb, furAlpha);
 }

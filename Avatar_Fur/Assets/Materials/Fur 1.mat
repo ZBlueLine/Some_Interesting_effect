@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LowLayer_Fur
+  m_Name: Fur 1
   m_Shader: {fileID: 4800000, guid: 5501e33951f95fe4ba95944d54630821, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: ENABLE_SECOND_NOISE_TEX
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -39,22 +39,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _FurTex:
-        m_Texture: {fileID: 2800000, guid: ef4546d3e423d034f82caa6cdd800854, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 2, y: 2}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: aa059315aaf79f84a93a1d1b3f6bb9c0, type: 3}
-        m_Scale: {x: 15, y: 5}
-        m_Offset: {x: 1, y: 0}
+        m_Texture: {fileID: 2800000, guid: ef4546d3e423d034f82caa6cdd800854, type: 3}
+        m_Scale: {x: 10, y: 10}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -64,52 +60,48 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SecondNoiseTex:
-        m_Texture: {fileID: 2800000, guid: 149bf198d8ba53a46b2bde9affe9de1c, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: ef4546d3e423d034f82caa6cdd800854, type: 3}
+        m_Scale: {x: 10, y: 10}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AnisotropicScale: 0.638
-    - _BlendScale: 0.486
+    - _AnisotropicScale: 0.299
+    - _BlendScale: 0.772
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnalBias: 0.0129
-    - _FresnalPower: 3.07
-    - _FresnalScale: 2.08
-    - _FresnelPow: 1.83
-    - _FresnelScale: 1
-    - _FurDirLightExposure: 1.23
-    - _FurLength: 0.092
-    - _FurRadius: 42.6
+    - _FresnalBias: 0.13
+    - _FresnalPower: 6.25
+    - _FresnalScale: 2.53
+    - _FresnelPow: 0.99
+    - _FresnelScale: 0.027
+    - _FurDirLightExposure: 1.51
+    - _FurLength: 0.81
+    - _FurRadius: 1.4
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LightFilter: 0.3
+    - _LightFilter: -0.2
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseIntensity: 1.31
-    - _OcclusionPower: 0.9
-    - _OcclusionRange: 2
+    - _OcclusionPower: 1.44
+    - _OcclusionRange: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _UVOffsetAtten: 0.146
-    - _UVOffsetLimit: 0
     - _UVSec: 0
-    - _UvOffsetScale: 0.9
     - _ZWrite: 1
-    - enable_second_noise_tex: 0
+    - enable_second_noise_tex: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FresnalColor: {r: 0.9150943, g: 0.71221966, b: 0.8778315, a: 1}
-    - _FurColor: {r: 0.94509804, g: 0.5921569, b: 0.827451, a: 1}
-    - _OcclusionColor: {r: 1, g: 0.5254902, b: 0.6431373, a: 1}
+    - _FresnalColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FurColor: {r: 0.9433962, g: 0.5918476, b: 0.82804435, a: 1}
+    - _OcclusionColor: {r: 1, g: 0.5254902, b: 0.6417867, a: 1}
     - _SpecColor1: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecColor2: {r: 0.6039216, g: 0.37254903, b: 0.6039216, a: 1}
-    - _SpecInfo: {r: 13.65, g: -0, b: 1.75, a: 3}
-    - _UVOffset: {r: 85.44, g: 100, b: 0, a: 0}
-    - _UvOffset: {r: 0, g: 98.8, b: 0, a: 73}
+    - _SpecColor2: {r: 1, g: 0.24056602, b: 0.3419393, a: 1}
+    - _SpecInfo: {r: 9.8, g: -0.08, b: 2.25, a: 1.39}
+    - _UVOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _UvOffset: {r: 0, g: 80, b: 7.8, a: 80}
