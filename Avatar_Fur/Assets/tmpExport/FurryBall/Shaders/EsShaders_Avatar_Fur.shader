@@ -4,9 +4,9 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        [NoScaleOffset]_NoiseTex ("Noise Texture", 2D) = "white" {}
         [Toggle(ENABLE_SECOND_NOISE_TEX)]enable_second_noise_tex("enable second noise texture", float) = 0
-        _SecondNoiseTex("Second Noise Texture", 2D) = "black" {}
+        [NoScaleOffset]_SecondNoiseTex("Second Noise Texture", 2D) = "black" {}
 
         _FurColor("Fur Color", Color) = (0, 0, 0, 1)
         _FurLength("Furry Length", Range(0, 0.2)) = 1

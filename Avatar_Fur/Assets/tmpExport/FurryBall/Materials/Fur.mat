@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Fur
   m_Shader: {fileID: 4800000, guid: f86f17aea3bc4964d804aba9a4ceb910, type: 3}
-  m_ShaderKeywords: ENABLE_SECOND_NOISE_TEX
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -64,23 +64,27 @@ Material:
         m_Scale: {x: 9, y: 9}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AnisotropicScale: 0.285
+    - _AnisotropicScale: 0.739
     - _BlendScale: 0.772
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnalBias: 0.13
+    - _FresnalBias: 0.0111
     - _FresnalPower: 6.25
     - _FresnalScale: 2.53
     - _FresnelPow: 0.99
     - _FresnelScale: 0.027
     - _FurDirLightExposure: 1.3
-    - _FurLength: 0.191
-    - _FurRadius: 13.6
+    - _FurLength: 0.108
+    - _FurRadius: 18.65
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _Layer1FurDensityX: 5.96
+    - _Layer1FurDensityY: 11.2
+    - _Layer2FurDensityX: 26.6
+    - _Layer2FurDensityY: -4.88
     - _LightFilter: -0.1
     - _Metallic: 0
     - _Mode: 0
@@ -89,11 +93,15 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
+    - _Spec1Offset: 0
+    - _Spec1Power: 2.7
+    - _Spec2Offset: 2
+    - _Spec2Power: 7.7
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
-    - enable_second_noise_tex: 1
+    - enable_second_noise_tex: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
@@ -103,5 +111,5 @@ Material:
     - _SpecColor1: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor2: {r: 1, g: 0.24056602, b: 0.3419393, a: 1}
     - _SpecInfo: {r: 9.8, g: -0.08, b: 2.25, a: 1.39}
-    - _UVOffset: {r: 50.6, g: 100, b: 32.64, a: 100}
+    - _UVOffset: {r: -89.7, g: 100, b: 0, a: 100}
     - _UvOffset: {r: 0, g: 80, b: 7.8, a: 80}
