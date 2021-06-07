@@ -135,7 +135,7 @@ Material:
     - _WorldLightInfluence: 0.1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.33716366, g: 0.33716366, b: 0.33716366, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DarkShadowMultColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _DarkSideRimColor: {r: 1, g: 1, b: 1, a: 1}
